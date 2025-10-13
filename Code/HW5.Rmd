@@ -6,22 +6,24 @@ output: html_document
 ---
 
 ```{r setup, message=FALSE}
+data <- read.csv("/Users/nancyz/STAT486/Data/NewNOAA.csv") #replace with your path
 ```
-```{r package, include=FALSE}
-smoother.pck <-
+
+```{r package, include=FALSE} 
+smoother.pck <- #received error that version of this package not available for this version of R
 c("smoother.pck", "bin.mean", "gauss.mean", "gauss.reg", "gauss.mean.trunc", 
 "gauss.reg.trunc", "my.hat.w")
 bin.mean <-
 function(x,y,nbin,xcol=2)
 {
-o1<-order(x)
-x1<-x[o1]
-y1<-y[o1]
-r1<-range(x)
-inc<-(r1[2]-r1[1])/nbin
-yvec<-NULL
-smat<-NULL
-for(i in 1:nbin){
+  o1<-order(x)
+  x1<-x[o1]
+  y1<-y[o1]
+  r1<-range(x)
+  inc<-(r1[2]-r1[1])/nbin
+  yvec<-NULL
+  smat<-NULL
+  for(i in 1:nbin){
         bin.low<-r1[1]+(i-1)*inc
         bin.high<-r1[1]+i*inc
         
@@ -54,6 +56,7 @@ resid<-y-ypred
 list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,x=x)
                 
 }
+
 gauss.mean <-
 function(x,y,lambda,xcol=3,do.plot=T)
 {
@@ -186,5 +189,4 @@ function(x,wt){
 x1<-cbind(1,x)
 x1%*%solve(t(x1)%*%diag(wt)%*%x1)%*%t(x1)%*%(diag(wt))
 }
-
 ```
