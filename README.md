@@ -1,2 +1,2 @@
 # Stat-Learning-486
-HW Repository
+HW repository for [Applied Statistical Learning 01:960:486:01] with Professor LuValle. 
