@@ -5,16 +5,22 @@ date: "2025-10-13"
 output: html_document
 ---
 
+### Setup
+First, we load in our data. This is the NOAA.new dataset from Canvas.
 ```{r setup, message=FALSE}
-data <- read.csv("/Users/nancyz/STAT486/Data/NewNOAA.csv") #replace with your path
+NOAA.new <- read.csv("/Users/nancyz/STAT486/Data/NewNOAA.csv") #replace with your path
+x <- NOAA.new[,3] #temperature rise 
+y <- NOAA.new[,2] #rate of billion-dollar disasters
 ```
 
-```{r package, include=FALSE} 
+### Edited smoother.pck
+This section contains the edited smoother.pck and its functions, with PRESS statistic in each smoother. 
+```{r edited-package, message=FALSE}
 smoother.pck <- #received error that version of this package not available for this version of R
 c("smoother.pck", "bin.mean", "gauss.mean", "gauss.reg", "gauss.mean.trunc", 
 "gauss.reg.trunc", "my.hat.w")
 bin.mean <-
-function(x,y,nbin,xcol=2)
+function(x,y,nbin,xcol=2,do.plot=F)
 {
   o1<-order(x)
   x1<-x[o1]
@@ -48,12 +54,12 @@ dferror<-length(x1)-sum(diag(2*smat-smat%*%(t(smat))))
 delta1<-sum(diag(t(diag(n99)-smat)%*%(diag(n99)-smat)))
 R<-t(diag(n99)-smat)%*%(diag(n99)-smat)
 delta2<-2*sum(diag(R%*%R))
-lines(x1,yvec,col=xcol)
+if(isTRUE(do.plot)) lines(x1,as.numeric(smat%*%y1),col=xcol)
 ypred<-y1
 ypred<-smat%*%y1
-resid<-y-ypred
-
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,x=x)
+resid<-y1-ypred
+PRESS<-sum((resid/(1-diag(smat)))^2)  #added PRESS statistic calculation
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,x=x,press=PRESS)
                 
 }
 
@@ -87,6 +93,7 @@ PRESS<-sum((resid/(1-diag(smat)))^2)
 list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
         
 }
+
 gauss.reg <-
 function(x,y,lambda,xcol=4,do.plot=T)
 {
@@ -114,8 +121,10 @@ delta2<-2*sum(diag(R%*%R))
 resid<-y1-smat%*%y1
 ypred<-y1
 ypred[o1]<-smat%*%y1
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred)
+PRESS<-sum((resid/(1-diag(smat)))^2)  #added PRESS statistic calculation
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
 }
+
 gauss.mean.trunc <-
 function(x,y,lambda,nnn,xcol=5,do.plot=T)
 {
@@ -128,7 +137,7 @@ n1<-length(x1)
 trunc.val<-n1-nnn
 for(i in 1:n1){
         v1<-dnorm(x1,x1[i],lambda)
-        o2<-order(v1)
+        o2<-order(v1)                        
         thresh<-v1[o2[trunc.val]]
         v1<-v1*(v1>thresh)
         v1<-v1/sum(v1)
@@ -146,9 +155,11 @@ delta2<-2*sum(diag(R%*%R))
 resid<-y1-smat%*%y1
 ypred<-y1
 ypred[o1]<-smat%*%y1
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred)
+PRESS<-sum((resid/(1-diag(smat)))^2)  #added PRESS statistic calculation
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
                 
 }
+
 gauss.reg.trunc <-
 function(x,y,lambda,nnn,xcol=6,do.plot=T)
 {
@@ -161,8 +172,8 @@ n1<-length(x1)
 trunc.val<-n1-nnn
 for(i in 1:n1){
         v1<-dnorm(x1,x1[i],lambda)
-        o1<-order(v1)
-        thresh<-v1[o1[trunc.val]]
+        o2<-order(v1)                         
+        thresh<-v1[o2[trunc.val]]
         v1<-v1*(v1>thresh)
         v1<-v1/sum(v1)
         H1<-my.hat.w(x1,v1)
@@ -180,13 +191,47 @@ delta2<-2*sum(diag(R%*%R))
 resid<-y1-smat%*%y1
 ypred<-y1
 ypred[o1]<-smat%*%y1
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred)
-
-        
+PRESS<-sum((resid/(1-diag(smat)))^2)  #added PRESS statistic calculation
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
 }
+
 my.hat.w <-
 function(x,wt){
 x1<-cbind(1,x)
 x1%*%solve(t(x1)%*%diag(wt)%*%x1)%*%t(x1)%*%(diag(wt))
 }
+```
+
+```{r what}
+#base plot
+plot(x, y, xlab = "temperature rise", ylab = "rate of billion-dollar disasters", pch = 19, cex = 0.7)
+
+#refit with plotting turned on for ALL
+fit_bin<-bin.mean(x, y, nbin = 6, xcol = 2, do.plot = TRUE)  
+fit_gm<-gauss.mean(x, y, lambda = 0.063, xcol = 3, do.plot = TRUE)
+fit_gr<-gauss.reg(x,  y, lambda = 0.078, xcol = 4, do.plot = TRUE)
+fit_gm_trunc<-gauss.mean.trunc(x, y, lambda = 0.063, nnn = 20, xcol = 5, do.plot = TRUE)
+fit_gr_trunc<-gauss.reg.trunc(x,  y, lambda = 0.08, nnn = 17, xcol = 6, do.plot = TRUE)
+
+#legend for the lines
+legend("topleft", inset = 0.02, bty = "n", lwd = 2, lty = rep(1, 5), col = c(2,3,4,5,6), 
+       legend = c("bin.mean (nbin=6)",
+                  "gauss.mean (λ=0.063)",
+                  "gauss.reg (λ=0.078)",
+                  "gauss.mean.trunc (λ=0.063, nnn=20)",
+                  "gauss.reg.trunc  (λ=0.08, nnn=17)"))
+
+#comparing PRESS in a table:
+press_table <- data.frame(
+  smoother = c("bin.mean (nbin=6)",
+               "gauss.mean (λ=0.063)",
+               "gauss.reg (λ=0.078)",
+               "gauss.mean.trunc (λ=0.063, nnn=20)",
+               "gauss.reg.trunc (λ=0.08,  nnn=17)"),
+  PRESS = c(fit_bin$press,
+            fit_gm$press,
+            fit_gr$press,
+            fit_gm_trunc$press,
+            fit_gr_trunc$press))
+print(press_table)
 ```
