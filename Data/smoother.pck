@@ -4,23 +4,31 @@ c("smoother.pck", "bin.mean", "gauss.mean", "gauss.reg", "gauss.mean.trunc",
 bin.mean <-
 function(x,y,nbin,xcol=2)
 {
+#order x and y
 o1<-order(x)
 x1<-x[o1]
 y1<-y[o1]
+#find min and max x
 r1<-range(x)
+#width of each bin = (max - min) / number of bins
 inc<-(r1[2]-r1[1])/nbin
 yvec<-NULL
 smat<-NULL
+#for each bin:
 for(i in 1:nbin){
+        #find min and max values for the bin
         bin.low<-r1[1]+(i-1)*inc
         bin.high<-r1[1]+i*inc
-        
+
+        #I1: true if x1 is within the current bin or a later bin
         I1<-x1>=bin.low
+        #I2: true if x1 is within the current bin or an earlier bin
 if(i<nbin){
         I2<-x1<bin.high
 }else{
         I2<-x1<=(bin.high+200)
 }
+        #I3: true if both I1 and I2 are true, meaning x1 is within the current bin
         I3<-as.logical(I1*I2)
         yval<-mean(y1[I3])
         n1<-sum(I3)
@@ -28,6 +36,7 @@ if(i<nbin){
         for(i in 1:n1){
         matdum<-rbind(matdum,I3*1/n1)
         }
+        #add to matrix
         smat<-rbind(smat,matdum)
         yvec<-c(yvec,rep(yval,n1))
 }
@@ -176,3 +185,4 @@ function(x,wt){
 x1<-cbind(1,x)
 x1%*%solve(t(x1)%*%diag(wt)%*%x1)%*%t(x1)%*%(diag(wt))
 }
+
