@@ -307,6 +307,8 @@ print(press_table)
 This function references the pseudocode from slide 19 of Class 9. It's purpose is to find better values of the adjustable parameters, based on minimizing PRESS. 
 ```{r greedy}
 greedy.search <- function(fit.eval,init.gen,perturb.gen,in.bounds,max.no.improve=300,target=Inf){
+#parameters: fit.eval - function to use for fit, init,gen - function to generate parameters for fit, perturb.gen - function to randomly perturb parameters
+#in.bounds - function to check whether value is within the given bounds, max.no.improve - max number of trials, target - criterion for fit
 #do a random fit, choose parameters = pi0
 pi0 <- init.gen()
 crit0 <- fit.eval(pi0)#check and save fit
