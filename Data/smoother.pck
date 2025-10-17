@@ -30,91 +30,114 @@ if(i<nbin){
 }
         #I3: true if both I1 and I2 are true, meaning x1 is within the current bin
         I3<-as.logical(I1*I2)
+        #find mean of the bucket
         yval<-mean(y1[I3])
         n1<-sum(I3)
         matdum<-NULL
         for(i in 1:n1){
         matdum<-rbind(matdum,I3*1/n1)
         }
-        #add to matrix
+        #convert values in each bucket to the mean and add to matrix
         smat<-rbind(smat,matdum)
         yvec<-c(yvec,rep(yval,n1))
 }
+#calculate degrees of freedom, delta1, delta2, and R based on number of data points
 n99<-length(x1)
 dferror<-length(x1)-sum(diag(2*smat-smat%*%(t(smat))))
 delta1<-sum(diag(t(diag(n99)-smat)%*%(diag(n99)-smat)))
 R<-t(diag(n99)-smat)%*%(diag(n99)-smat)
 delta2<-2*sum(diag(R%*%R))
+#graph x values
 lines(x1,yvec,col=xcol)
+#predict y values and calculate residuals using predicted and actual values
 ypred<-y1
 ypred<-smat%*%y1
 resid<-y-ypred
 
+#return
 list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,x=x)
                 
 }
 gauss.mean <-
 function(x,y,lambda,xcol=3,do.plot=T)
 {
+#order data
 o1<-order(x)
 x1<-x[o1]
 y1<-y[o1]
 r1<-range(x)
 smat<-NULL
 n1<-length(x1)
+#for each data point:
 for(i in 1:n1){
+        #take a sample with the data point as the mean and lambda as the standard deviation
         v1<-dnorm(x1,x1[i],lambda)
+        #normalize vector by dividing by mean and add to matrix
         v1<-v1/sum(v1)
         smat<-rbind(smat,v1)
 }
 yhat<-smat%*%y1
+#plot if enabled
 if(do.plot){
 lines(x1,yhat,col=xcol)
 }
 n99<-length(x1)
+#calculate degrees of freedom, delta1, delta2, and R based on number of data points
 dferror<-length(x1)-sum(diag(2*smat-smat%*%(t(smat))))
 delta1<-sum(diag(t(diag(n99)-smat)%*%(diag(n99)-smat)))
 R<-t(diag(n99)-smat)%*%(diag(n99)-smat)
 delta2<-2*sum(diag(R%*%R))
+#calculate residuals and use PRESS function on the sum of squares
 resid<-y1-smat%*%y1
 ypred<-y1
 ypred[o1]<-smat%*%y1
 PRESS<-sum((resid/(1-diag(smat)))^2)
+#return
 list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
         
 }
 gauss.reg <-
 function(x,y,lambda,xcol=4,do.plot=T)
 {
+#order data
 o1<-order(x)
 x1<-x[o1]
 y1<-y[o1]
 r1<-range(x)
 smat<-NULL
 n1<-length(x1)
+#for each data point:
 for(i in 1:n1){
+        #take a sample with the data point as the mean and lambda as the standard deviation
         v1<-dnorm(x1,x1[i],lambda)
+        #normalize vector by dividing by mean
         v1<-v1/sum(v1)
+        #generate hat matrix
         H1<-my.hat.w(x1,v1)
         smat<-rbind(smat,H1[i,])
 }
 yhat<-smat%*%y1
+#plot if enabled
 if(do.plot){
 lines(x1,yhat,col=xcol)
 }
 n99<-length(x1)
+#calculate degrees of freedom, delta1, delta2, and R based on number of data points
 dferror<-length(x1)-sum(diag(2*smat-smat%*%(t(smat))))
 delta1<-sum(diag(t(diag(n99)-smat)%*%(diag(n99)-smat)))
 R<-t(diag(n99)-smat)%*%(diag(n99)-smat)
 delta2<-2*sum(diag(R%*%R))
+#calculate residuals
 resid<-y1-smat%*%y1
 ypred<-y1
 ypred[o1]<-smat%*%y1
+#return
 list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred)
 }
 gauss.mean.trunc <-
 function(x,y,lambda,nnn,xcol=5,do.plot=T)
 {
+#order data
 o1<-order(x)
 x1<-x[o1]
 y1<-y[o1]
@@ -123,31 +146,40 @@ smat<-NULL
 n1<-length(x1)
 trunc.val<-n1-nnn
 for(i in 1:n1){
+        #generate sample with sd lambda and mean x1[i]
         v1<-dnorm(x1,x1[i],lambda)
+        #order vector
         o2<-order(v1)
+        #remove values less than the threshold for truncating
         thresh<-v1[o2[trunc.val]]
         v1<-v1*(v1>thresh)
+        #normalize and add to matrix
         v1<-v1/sum(v1)
         smat<-rbind(smat,v1)
 }
 yhat<-smat%*%y1
+#graph if enabled
 if(do.plot){
 lines(x1,yhat,col=xcol)
 }
 n99<-length(x1)
+#calculate degrees of freedom, delta1, delta2, and R based on number of data points
 dferror<-length(x1)-sum(diag(2*smat-smat%*%(t(smat))))
 delta1<-sum(diag(t(diag(n99)-smat)%*%(diag(n99)-smat)))
 R<-t(diag(n99)-smat)%*%(diag(n99)-smat)
 delta2<-2*sum(diag(R%*%R))
+#predict y values and calculate residuals
 resid<-y1-smat%*%y1
 ypred<-y1
 ypred[o1]<-smat%*%y1
+#return
 list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred)
                 
 }
 gauss.reg.trunc <-
 function(x,y,lambda,nnn,xcol=6,do.plot=T)
 {
+#order data
 o1<-order(x)
 x1<-x[o1]
 y1<-y[o1]
@@ -156,26 +188,35 @@ smat<-NULL
 n1<-length(x1)
 trunc.val<-n1-nnn
 for(i in 1:n1){
+        #generate sample with sd lambda and mean x1[i]
         v1<-dnorm(x1,x1[i],lambda)
+        #order vector
         o1<-order(v1)
+        #remove values less than the threshold for truncating
         thresh<-v1[o1[trunc.val]]
         v1<-v1*(v1>thresh)
+        #normalize vector
         v1<-v1/sum(v1)
+        #generate hat matrix
         H1<-my.hat.w(x1,v1)
         smat<-rbind(smat,H1[i,])
 }
 yhat<-smat%*%y1
+#plot if enabled
 if(do.plot){
 lines(x1,yhat,col=xcol)
 }
 n99<-length(x1)
+#calculate degrees of freedom, delta1, delta2, and R based on number of data points
 dferror<-length(x1)-sum(diag(2*smat-smat%*%(t(smat))))
 delta1<-sum(diag(t(diag(n99)-smat)%*%(diag(n99)-smat)))
 R<-t(diag(n99)-smat)%*%(diag(n99)-smat)
 delta2<-2*sum(diag(R%*%R))
+#predict y values and calculate residuals
 resid<-y1-smat%*%y1
 ypred<-y1
 ypred[o1]<-smat%*%y1
+#return
 list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred)
 
         
@@ -185,4 +226,5 @@ function(x,wt){
 x1<-cbind(1,x)
 x1%*%solve(t(x1)%*%diag(wt)%*%x1)%*%t(x1)%*%(diag(wt))
 }
+
 
