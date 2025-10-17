@@ -304,13 +304,12 @@ print(press_table)
 ```
 
 #### Greedy Random Search Function 
-This function references the pseudocode from slide 19 of Class 9. It's purpose is to find better values of the adjustable parameters, based on minimizing PRESS. 
+This function references the pseudo-code from slide 19 of Class 9. Its purpose is to find better values of the adjustable parameters, based on minimizing PRESS. 
 ```{r greedy}
 greedy.search <- function(fit.eval,init.gen,perturb.gen,in.bounds,max.no.improve=300,target=Inf){
 #do a random fit, choose parameters = pi0
 pi0 <- init.gen()
-crit0 <- fit.eval(pi0)#check and save fit
-
+crit0 <- fit.eval(pi0) #check and save fit
 best.par <- pi0
 best.crit <- crit0
 noimp <- 0
@@ -338,4 +337,23 @@ while(noimp < max.no.improve && best.crit > target)
 #output pi0 and final fit criterion
 list(par=best.par,press=best.crit,tries=noimp)}
 ```
+
+#### Performance of the Greedy Random Search Function
+```{r grs-perf, message=FALSE}
+greedy.bin <- 
+greedy.gm <- 
+greedy.gm.t <- 
+greedy.gr <- 
+greedy.gr.t <- 
+  
+
+#final press, final lambdas
+best.bin.mean <-
+best.guass.mean <-
+best.gauss.mean.trunc <-
+best.gauss.reg <-
+best.gauss.reg.trunc<-
+```
+
+#### Conclusion
 
