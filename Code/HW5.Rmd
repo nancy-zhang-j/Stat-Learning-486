@@ -75,7 +75,8 @@ resid<-y1-(smat%*%y1)
 hii<-diag(smat); den<-1-hii; den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
 PRESS<-sum(loo^2) 
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,x=x,press=PRESS)
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+x=x,press=PRESS)
                 
 }
 
@@ -115,7 +116,8 @@ ypred[o1]<-smat%*%y1
 hii<-diag(smat); den<-1-hii; den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
 PRESS<-sum(loo^2)
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+press=PRESS)
         
 }
 
@@ -157,7 +159,8 @@ ypred[o1]<-smat%*%y1
 hii<-diag(smat); den<-1-hii; den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
 PRESS<-sum(loo^2)  #added PRESS statistic calculation
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+press=PRESS)
 }
 
 gauss.mean.trunc <-
@@ -202,7 +205,8 @@ ypred[o1]<-smat%*%y1
 hii<-diag(smat); den<-1-hii; den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
 PRESS<-sum(loo^2)  #added PRESS statistic calculation
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+press=PRESS)
                 
 }
 
@@ -249,7 +253,8 @@ ypred[o1]<-smat%*%y1
 hii<-diag(smat); den<-1-hii; den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
 PRESS<-sum(loo^2)  #added PRESS statistic calculation
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+press=PRESS)
 }
 
 
@@ -314,8 +319,9 @@ print(press_table)
 This function references the pseudo-code from slide 19 of Class 9. Its purpose is to find better values of the adjustable parameters, based on minimizing PRESS. 
 ```{r greedy}
 greedy.search<-function(fit.eval,init.gen,perturb.gen,in.bounds,max.no.improve=300,target=Inf){
-#parameters: fit.eval - function to use for fit, init,gen - function to generate parameters for fit, perturb.gen - function to randomly perturb parameters
-#in.bounds - function to check whether value is within the given bounds, max.no.improve - max number of trials, target - criterion for fit
+#parameters: fit.eval - function to use for fit, init,gen - function to generate parameters for fit, 
+#perturb.gen - function to randomly perturb parameters, in.bounds - function to check whether value is within the given bounds, 
+#max.no.improve - max number of trials, target - criterion for fit
 #do a random fit, choose parameters = pi0
 pi0<-init.gen()
 crit0<-fit.eval(pi0) #check and save fit

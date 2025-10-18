@@ -425,7 +425,8 @@ ypred[o1]&lt;-smat%*%y1
 resid&lt;-y1-(smat%*%y1)
 PRESS&lt;-sum((resid/(1-diag(smat)))^2) 
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,x=x,press=PRESS)
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+x=x,press=PRESS)
                 
 }
 
@@ -464,7 +465,8 @@ ypred&lt;-y
 ypred[o1]&lt;-smat%*%y1
 PRESS&lt;-sum((resid/(1-diag(smat)))^2)
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+press=PRESS)
         
 }
 
@@ -505,7 +507,8 @@ ypred&lt;-y
 ypred[o1]&lt;-smat%*%y1
 PRESS&lt;-sum((resid/(1-diag(smat)))^2)  #added PRESS statistic calculation
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+press=PRESS)
 }
 
 gauss.mean.trunc &lt;-
@@ -549,7 +552,8 @@ ypred&lt;-y
 ypred[o1]&lt;-smat%*%y1
 PRESS&lt;-sum((resid/(1-diag(smat)))^2)  #added PRESS statistic calculation
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+press=PRESS)
                 
 }
 
@@ -595,7 +599,8 @@ ypred&lt;-y
 ypred[o1]&lt;-smat%*%y1
 PRESS&lt;-sum((resid/(1-diag(smat)))^2)  #added PRESS statistic calculation
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,press=PRESS)
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+  press=PRESS)
 }
 
 my.hat.w &lt;-
@@ -667,8 +672,9 @@ print(press_table)</code></pre>
 Its purpose is to find better values of the adjustable parameters, based
 on minimizing PRESS.</p>
 <pre class="r"><code>greedy.search&lt;-function(fit.eval,init.gen,perturb.gen,in.bounds,max.no.improve=300,target=Inf){
-#parameters: fit.eval - function to use for fit, init,gen - function to generate parameters for fit, perturb.gen - function to randomly perturb parameters
-#in.bounds - function to check whether value is within the given bounds, max.no.improve - max number of trials, target - criterion for fit
+#parameters: fit.eval - function to use for fit, init,gen - function to generate parameters for fit, 
+#perturb.gen - function to randomly perturb parameters, in.bounds - function to check whether value is within the given bounds,
+#max.no.improve - max number of trials, target - criterion for fit
 #do a random fit, choose parameters = pi0
 pi0&lt;-init.gen()
 crit0&lt;-fit.eval(pi0) #check and save fit
