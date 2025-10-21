@@ -18,7 +18,8 @@ y <- NOAA.new[,2] #rate of billion-dollar disasters
 #### Edited smoother.pck
 This section contains the edited smoother.pck and its functions, with PRESS statistic in each smoother. The function chunks are fully commented, as this data was taken from Canvas/slides.
 ```{r edited-package, message=FALSE}
-smoother.pck <- #received error that version of this package not available for this version of R
+smoother.pck <- #received error that version of this package not available for this 
+  #version of R
 c("smoother.pck", "bin.mean", "gauss.mean", "gauss.reg", "gauss.mean.trunc", 
 "gauss.reg.trunc", "my.hat.w")
 bin.mean <-
@@ -72,10 +73,13 @@ if(isTRUE(do.plot)) lines(x1,as.numeric(smat%*%y1),col=xcol)
 ypred<-y
 ypred[o1]<-smat%*%y1
 resid<-y1-(smat%*%y1)
-hii<-diag(smat); den<-1-hii; den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
+hii<-diag(smat); den<-1-hii; den[den<=1e-8]<-1e-8; 
+loo<-as.numeric(resid)/den;
+loo[!is.finite(loo)]<-0
 PRESS<-sum(loo^2) 
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,
+     resid=resid,pred=ypred,
 x=x,press=PRESS)
                 
 }
@@ -113,7 +117,9 @@ delta2<-2*sum(diag(R%*%R))
 resid<-y1-smat%*%y1
 ypred<-y
 ypred[o1]<-smat%*%y1
-hii<-diag(smat); den<-1-hii; den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
+hii<-diag(smat); 
+den<-1-hii; 
+den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
 PRESS<-sum(loo^2)
 #return
 list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
@@ -156,7 +162,9 @@ delta2<-2*sum(diag(R%*%R))
 resid<-y1-smat%*%y1
 ypred<-y
 ypred[o1]<-smat%*%y1
-hii<-diag(smat); den<-1-hii; den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
+hii<-diag(smat); 
+den<-1-hii; 
+den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
 PRESS<-sum(loo^2)  #added PRESS statistic calculation
 #return
 list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
@@ -202,7 +210,9 @@ delta2<-2*sum(diag(R%*%R))
 resid<-y1-smat%*%y1
 ypred<-y
 ypred[o1]<-smat%*%y1
-hii<-diag(smat); den<-1-hii; den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
+hii<-diag(smat); 
+den<-1-hii; 
+den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
 PRESS<-sum(loo^2)  #added PRESS statistic calculation
 #return
 list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
@@ -250,10 +260,13 @@ delta2<-2*sum(diag(R%*%R))
 resid<-y1-smat%*%y1
 ypred<-y
 ypred[o1]<-smat%*%y1
-hii<-diag(smat); den<-1-hii; den[den<=1e-8]<-1e-8; loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
+hii<-diag(smat); den<-1-hii; 
+den[den<=1e-8]<-1e-8; 
+loo<-as.numeric(resid)/den; loo[!is.finite(loo)]<-0
 PRESS<-sum(loo^2)  #added PRESS statistic calculation
 #return
-list(smat=smat,df=sum(diag(smat)),dferror=dferror,delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
+list(smat=smat,df=sum(diag(smat)),dferror=dferror,
+     delta1=delta1,delta2=delta2,resid=resid,pred=ypred,
 press=PRESS)
 }
 
@@ -289,8 +302,10 @@ plot(x,y,xlab = "temperature rise",ylab = "rate of billion-dollar disasters",pch
 fit_bin<-bin.mean(x,y,nbin=6,xcol=2,do.plot=TRUE)  #bin.mean function 
 fit_gm<-gauss.mean(x,y,lambda=0.063,xcol=3,do.plot=TRUE) #gauss.mean function
 fit_gr<-gauss.reg(x,y,lambda=0.078,xcol=4,do.plot=TRUE) #gauss.reg function
-fit_gm_trunc<-gauss.mean.trunc(x,y,lambda=0.063,nnn=20,xcol=5,do.plot = TRUE) #gauss mean truncated function
-fit_gr_trunc<-gauss.reg.trunc(x,y,lambda=0.08,nnn=17,xcol=6,do.plot =TRUE) #gauss reg truncated function
+#gauss mean truncated function
+fit_gm_trunc<-gauss.mean.trunc(x,y,lambda=0.063,nnn=20,xcol=5,do.plot = TRUE) 
+#gauss reg truncated function
+fit_gr_trunc<-gauss.reg.trunc(x,y,lambda=0.08,nnn=17,xcol=6,do.plot =TRUE) 
 
 #legend for the lines
 legend("topleft",inset = 0.02,bty = "n",lwd=2,lty=rep(1, 5),col=c(2,3,4,5,6), 
@@ -319,8 +334,10 @@ print(press_table)
 This function references the pseudo-code from slide 19 of Class 9. Its purpose is to find better values of the adjustable parameters, based on minimizing PRESS. 
 ```{r greedy}
 greedy.search<-function(fit.eval,init.gen,perturb.gen,in.bounds,max.no.improve=300,target=Inf){
-#parameters: fit.eval - function to use for fit, init,gen - function to generate parameters for fit, 
-#perturb.gen - function to randomly perturb parameters, in.bounds - function to check whether value is within the given bounds, 
+#parameters: fit.eval - function to use for fit, init,gen - 
+#function to generate parameters for fit, 
+#perturb.gen - function to randomly perturb parameters, in.bounds - 
+#function to check whether value is within the given bounds, 
 #max.no.improve - max number of trials, target - criterion for fit
 #do a random fit, choose parameters = pi0
 pi0<-init.gen()
