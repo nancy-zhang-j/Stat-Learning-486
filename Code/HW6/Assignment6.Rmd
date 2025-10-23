@@ -345,6 +345,11 @@ boot_loopless_cis <- function(vec, stat_fn = mean, nboot = 2000, alpha = 0.05) {
 #examples of user prov functions
 stat_mean <- function(v) mean(v)
 stat_median <- function(v) median(v)
+trimmed_mean <- function(v, trim_percent = 20){
+	v = sort(v)
+	len = length(v)
+	mean(v[floor(trim_percent / 200 * len) : len+1-ceiling(trim_percent / 200 * len)])
+}
 ```
 
 ```{r bruh}
