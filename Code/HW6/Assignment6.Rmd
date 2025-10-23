@@ -296,7 +296,7 @@ boot_se <- function(vec, stat_fn, nboot2 = 400) {
 }
 
 #nested
-boot_t_nested_ci <- function(vec, stat_fn, nboot = 2000, nboot2 = 400, alpha = 0.05) {
+boot_t_nested_ci <- function(vec, stat_fn = mean, nboot = 2000, nboot2 = 400, alpha = 0.05) {
   vec <- as.numeric(vec); vec <- vec[is.finite(vec)]
   n <- length(vec); stopifnot(n >= 3)
 
@@ -323,7 +323,7 @@ boot_t_nested_ci <- function(vec, stat_fn, nboot = 2000, nboot2 = 400, alpha = 0
 }
 
 #attempt to do a loopless 
-boot_loopless_cis <- function(vec, stat_fn, nboot = 2000, alpha = 0.05) {
+boot_loopless_cis <- function(vec, stat_fn = mean, nboot = 2000, alpha = 0.05) {
   vec <- as.numeric(vec) 
   vec <- vec[is.finite(vec)]
   n <- length(vec)
