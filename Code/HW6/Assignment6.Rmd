@@ -349,6 +349,7 @@ stat_median <- function(v) median(v)
 
 ```{r bruh}
 x <- special.sample
+#mean using our new nested bootstrap-t
 mean_nested <- boot_t_nested_ci(x, stat_fn = stat_mean,
                                  nboot = nboot, nboot2 = nboot2, alpha = alpha)
 #median using our new nested bootstrap-t
