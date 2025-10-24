@@ -2,7 +2,9 @@
 title: "Assignment 6"
 author: "Nancy Zhang and Kyle Forrester"
 date: "2025-10-21"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 #### Setup
@@ -69,7 +71,8 @@ boxplot(betamat)
 list(bagged.beta=bagged.beta,orig.beta=beta00,mat=betamat)
 }
 my.boot.xy.conf <-
-function(mat.train=auto.q.train,mat.test=auto.q.pred,yind=1,xstring="lars",brep=10000,pred.int=T,alpha=.05){
+function(mat.train=auto.q.train,mat.test=auto.q.pred,yind=1,xstring="lars",
+brep=10000,pred.int=T,alpha=.05){
 #specialized version of bootstrap
 if(xstring=="lars"){
 library(lars)
@@ -129,7 +132,8 @@ qboot<-apply(ypredmat,2,quant.boot)
 }
 #
 y0<-mat.test[,yind]
-plot(rep(bagged.pred,5),c(y0,ypred0,bagged.pred,qboot[1,],qboot[2,]),xlab="Bagged prediction",ylab="Data and intervals",type="n",main=main1)
+plot(rep(bagged.pred,5),c(y0,ypred0,bagged.pred,qboot[1,],qboot[2,]),
+xlab="Bagged prediction",ylab="Data and intervals",type="n",main=main1)
 points(bagged.pred,y0)
 lines(bagged.pred,bagged.pred)
 o1<-order(bagged.pred)
@@ -137,7 +141,8 @@ lines(bagged.pred[o1],ypred0[o1],col=2)
 lines(bagged.pred[o1],smooth(qboot[1,o1]),col=3)
 lines(bagged.pred[o1],smooth(qboot[2,o1]),col=3)
 #
-list(bpred=bagged.pred,ypred0=ypred0,type=xstring,bagged.beta=bagged.beta,orig.beta=beta0,pred.int=pred.int)
+list(bpred=bagged.pred,ypred0=ypred0,type=xstring,bagged.beta=bagged.beta,
+orig.beta=beta0,pred.int=pred.int)
 }
 my.boot.xy.reduce <-
 function(mat.train=x.auto2,y=y.auto,xstring="leaps",brep=1000){
@@ -352,7 +357,7 @@ trimmed_mean <- function(v, trim_percent = 20){
 }
 ```
 
-```{r bruh}
+```{r results}
 x <- special.sample
 #mean using our new nested bootstrap-t
 mean_nested <- boot_t_nested_ci(x, stat_fn = stat_mean,
@@ -388,3 +393,7 @@ knitr::kable(
     "95%% CIs on special.sample (n = %d). Outer nboot = %d, inner nboot2 = %d.",
     length(special.sample), nboot, nboot2))
 ```
+
+
+### Conclusion
+We found that the point estimate for the mean was lower than that of the median, and that the loopless estimates (basic and percentile) had the same point estimates. However, the loopless confidence intervals were more narrow, implying that the error estimate was smaller. For both mean and median, the percentile estimate had more narrow bounds than the basic estimate. It is likely that the loopless functions yielded smaller intervals than the nested bootstrap because the bootstrap estimate for the standard error was larger than the error estimate used in the loopless function. The point estimates were the same because the mean of the data and the median of the data remain the same regardless of the method. used.
