@@ -646,7 +646,7 @@ boot_se &lt;- function(vec, stat_fn, nboot2 = 400) {
 }
 
 #nested
-boot_t_nested_ci &lt;- function(vec, stat_fn, nboot = 2000, nboot2 = 400, alpha = 0.05) {
+boot_t_nested_ci &lt;- function(vec, stat_fn = mean, nboot = 2000, nboot2 = 400, alpha = 0.05) {
   vec &lt;- as.numeric(vec); vec &lt;- vec[is.finite(vec)]
   n &lt;- length(vec); stopifnot(n &gt;= 3)
 
@@ -673,7 +673,7 @@ boot_t_nested_ci &lt;- function(vec, stat_fn, nboot = 2000, nboot2 = 400, alpha 
 }
 
 #attempt to do a loopless 
-boot_loopless_cis &lt;- function(vec, stat_fn, nboot = 2000, alpha = 0.05) {
+boot_loopless_cis &lt;- function(vec, stat_fn = mean, nboot = 2000, alpha = 0.05) {
   vec &lt;- as.numeric(vec) 
   vec &lt;- vec[is.finite(vec)]
   n &lt;- length(vec)
@@ -694,8 +694,14 @@ boot_loopless_cis &lt;- function(vec, stat_fn, nboot = 2000, alpha = 0.05) {
 
 #examples of user prov functions
 stat_mean &lt;- function(v) mean(v)
-stat_median &lt;- function(v) median(v)</code></pre>
+stat_median &lt;- function(v) median(v)
+trimmed_mean &lt;- function(v, trim_percent = 20){
+    v = sort(v)
+    len = length(v)
+    mean(v[floor(trim_percent / 200 * len) : len+1-ceiling(trim_percent / 200 * len)])
+}</code></pre>
 <pre class="r"><code>x &lt;- special.sample
+#mean using our new nested bootstrap-t
 mean_nested &lt;- boot_t_nested_ci(x, stat_fn = stat_mean,
                                  nboot = nboot, nboot2 = nboot2, alpha = alpha)
 #median using our new nested bootstrap-t
