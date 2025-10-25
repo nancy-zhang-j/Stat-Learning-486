@@ -271,7 +271,7 @@ function(str,matrix.train=auto.q.train,matrix.test=auto.q.pred,yindex=1)
 my.cp.extract.leaps2 <-
 function(str,matrix.train,y)
 {
-#str is the structure createing Cp and some choice vector, choosen.part is a string
+#str is the structure creating Cp and some choice vector, choosen.part is a string
 #
         #
 
@@ -396,4 +396,4 @@ knitr::kable(
 
 
 ### Conclusion
-We found that the point estimate for the mean was lower than that of the median, and that the loopless estimates (basic and percentile) had the same point estimates. However, the loopless confidence intervals were more narrow, implying that the error estimate was smaller. For both mean and median, the percentile estimate had more narrow bounds than the basic estimate. It is likely that the loopless functions yielded smaller intervals than the nested bootstrap because the bootstrap estimate for the standard error was larger than the error estimate used in the loopless function. The point estimates were the same because the mean of the data and the median of the data remain the same regardless of the method. used.
+We found that the point estimate for the mean was lower than that of the median, and that the loopless estimates (basic and percentile) had the same point estimates. However, the loopless confidence intervals were more narrow, implying that the error estimate was smaller. For both mean and median, the percentile estimate had more narrow bounds than the basic estimate. It is likely that the loopless functions yielded smaller intervals than the nested bootstrap because the bootstrap estimate for the standard error was larger than the error estimate used in the loopless function. The point estimates were the same because the mean of the data and the median of the data remain the same regardless of the method used.
