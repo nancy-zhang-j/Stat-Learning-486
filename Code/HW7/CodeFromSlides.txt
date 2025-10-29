@@ -1,0 +1,135 @@
+my.neuralnet<-
+function(X1,Y,hidden=3,output="linear")
+{
+#add bias term 1
+X<-cbind(1,X1)
+#generate random samples from normal distribution equal to the number of hidden neurons and number of hidden layers
+input.layer.length<-length(X[1,])
+w01<-rnorm(input.layer.length*hidden)
+w02<-rnorm(hidden)
+#combine vectors of samples and return
+w0<-c(w01,w02)
+print(w0)
+#optimization function that minimizes error
+myoptfunc<-
+function(w0){my.eval2.nnet(w0,X,Y,hidden,output)$llik
+}
+#minimize output function from neural net evaluation using CG method
+dum<-optim(w0,myoptfunc,method="CG")
+wfinal<-dum$par
+ss<-dum$val
+pred<-my.eval2.nnet(wfinal,X,Y,hidden,output)$pred
+#plot predictions vs. results
+plot(pred,Y)
+list(ss=ss,wfinal=wfinal)
+}
+my.eval1.nnet<-function(Xrow,w0,hidden,output){
+input.layer.length<-length(Xrow)
+w01<-w0[c(1:(length(Xrow)*hidden))]
+w02<-w0[-c(1:(length(Xrow)*hidden))]
+#generate a matrix of neurons in the hidden layers
+w1<-matrix(w01,input.layer.length,hidden)
+print(w1)
+print(Xrow)
+print(w02)
+xhidden<-t(Xrow)%*%w1
+#apply logistic function to the hidden layers, making the values probabilities between 0 and 1
+zhidden<-my.logistic(xhidden)
+#sum up hidden layer weights times their probabilities
+out<-sum(w02*zhidden)
+#if binary output, apply logistic function to map value between 0 and 1
+if(output=="binary"){
+out<-my.logistic(out)
+}
+out
+}
+my.eval2.nnet<-function(w0,X,Y,hidden,output){
+zfunc<-
+function(V){my.eval1.nnet(V,w0,hidden,output)}
+#predict between 0 and 1 for the X vector
+pred<-apply(X,1,zfunc)
+#if binary output, calculate negative sum of logarithmic likelihoods, otherwise calculate sum of squared residuals
+if(output=="binary"){
+llik<-(-1)*sum(log(pred)*Y+log(1-pred)*(1-Y))
+}else{
+llik<-sum((pred-Y)^2)
+}
+list(llik=llik,pred=pred,y=Y)
+}
+#map input values to probabilities
+my.logistic<-function(z){exp(z)/(1+exp(z))}
+
+my.neuralnet.multilayer<-
+function(X1,Y,hidden=3,output="linear",num.layers=1,lamb
+da=0)
+#there is now a paremeter for number of layers, so there can now be multilpe
+#lambda parameter will be used for regularization
+{
+X<-cbind(1,X1)
+input.layer.length<-length(X[1,])
+w01<-rnorm(input.layer.length*hidden+(num.layers-
+1)*hidden*hidden)
+w02<-rnorm(hidden)
+w0<-c(w01,w02)
+#print(w0)
+myoptfunc<-
+function(w0){my.eval2.nnet.ml(w0,X,Y,hidden,output,num.l
+ayers,lambda)$llik}
+dum<-optim(w0,myoptfunc,method="CG")
+wfinal<-dum$par
+ss<-dum$val
+duh<-
+my.eval2.nnet.ml(wfinal,X,Y,hidden,output,num.layers,lam
+bda)
+#plot predicted vs. actual
+plot(duh$pred,Y,
+main=paste("llik=",duh$llik,"\nSS=",ss),xlab="Prediction")
+list(ss=ss,wfinal=wfinal,ll=duh$llik)
+}
+my.eval1.nnet.ml<-
+function(Xrow,w0,hidden,output,num.layers=1){
+input.layer.length<-length(Xrow)
+w01<-w0[c(1:(length(Xrow)*hidden))]
+w0A<-w0[-c(1:(length(Xrow)*hidden))]
+w1<-matrix(w01,input.layer.length,hidden)
+xhidden<-t(Xrow)%*%w1
+zhidden<-my.logistic(xhidden)
+if(num.layers==1){
+w02<-w0A
+}
+else{
+nlayers<-num.layers
+#repeat for every layer, can have more than one layer
+while(nlayers>1){
+w01<-w0A[c(1:(hidden*hidden))]
+w0A<-w0A[-c(1:(hidden*hidden))]
+w01<-matrix(w01,hidden,hidden)
+xhidden<-(zhidden)%*%w01
+zhidden<-my.logistic(xhidden)
+nlayers<-nlayers-1
+}
+}
+w02<-w0A
+out<-sum(w02*zhidden)
+if(output=="binary"){
+out<-my.logistic(out)
+}
+out
+}
+my.eval2.nnet.ml<-
+function(w0,X,Y,hidden,output,num.layers,lambda)
+{
+zfunc<-
+function(V){my.eval1.nnet.ml(V,w0,hidden,output,
+num.layers)}
+pred<-apply(X,1,zfunc)
+if(output=="binary"){
+llik<-(-1)*sum(log(pred)*Y+log(1-pred)*(1-Y))
+}else{
+llik<-sum((pred-Y)^2)
+}
+loglik<-llik
+#lambda parameter determines impact of regularization term, could be 0, multiply sum of squares of weights
+llik<-llik+lambda*sum(w0^2)
+list(llik=llik,pred=pred,y=Y,loglik=loglik)
+}
