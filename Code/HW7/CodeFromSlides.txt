@@ -14,7 +14,7 @@ print(w0)
 myoptfunc<-
 function(w0){my.eval2.nnet(w0,X,Y,hidden,output)$llik
 }
-#minimize output function from neural net evaluation using CG method
+#minimize output function from neural net evaluation using CG optimization function
 dum<-optim(w0,myoptfunc,method="CG")
 wfinal<-dum$par
 ss<-dum$val
@@ -62,7 +62,7 @@ my.logistic<-function(z){exp(z)/(1+exp(z))}
 my.neuralnet.multilayer<-
 function(X1,Y,hidden=3,output="linear",num.layers=1,lamb
 da=0)
-#there is now a paremeter for number of layers, so there can now be multilpe
+#there is now a parameter for number of layers, so there can now be multilpe
 #lambda parameter will be used for regularization
 {
 X<-cbind(1,X1)
