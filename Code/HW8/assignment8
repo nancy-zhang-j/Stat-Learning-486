@@ -1,34 +1,32 @@
 fdr = function(pvals, independent=FALSE, q){
 psorted = sort(pvals)
 m = length(psorted)
-plot(c(1:m), psorted, type="l")
+plot(c(1:m), psorted, type="p")
 pstar = 0
 if (independent){
-plot(c(1:m), q*c(1:m)/m, type="l")
+lines(c(1:m), q*c(1:m)/m)
 for(i in c(1:m)){
 if (psorted[i] > pstar && psorted[i] < q*i/m){
 pstar = psorted[i]
 }
 }
-print("Assumed independence")
 }
 else{
-plot(c(1:m), q*c(1:m)/(m*sum(1/c(1:m))), type="l")
+lines(c(1:m), q*c(1:m)/(m*sum(1/c(1:m))))
 denom = (m*sum(1/c(1:m)))
 for(i in c(1:m)){
 if (psorted[i] > pstar && psorted[i] < q*i/denom){
-pstar = psorted[i]
+pstar = max(psorted[i])
 }
 }
-print("Did not assume independence")
 }
 specialp = c()
 for(i in c(1:m)){
-if (psorted[i] <= pstar){
-specialp = cbind(specialp, psorted[i])
-specialp
+if (pvals[i] <= pstar){
+specialp = c(specialp, i)
 }
 }
+list(ind=independent, interesting= specialp)
 }
 
 tcalc<-function(x){
