@@ -1,0 +1,103 @@
+---
+title: "HW10"
+author: "Nancy Zhang"
+date: "2025-11-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tourr)
+library(MASS)
+library(datasets)
+setwd("/Users/nancyz/Downloads")
+source("exploremv.pck")
+```
+
+```{r package-comments}
+movie.peru <-
+function(depth=350,depth.nw=200, dis.vec=c(8:13))
+{
+#Load in #D scatterplot library and make a 
+#empty 3D plot with colums 2-4 of Peru
+library(scatterplot3d)
+sctstr<-scatterplot3d(Peru[,c(2,3,4)],type="n")
+
+#Pull out ID cols from 24-27 into a matrix
+#Scale each of these ID cols differently/weighted
+IDmat<-Peru[,24:27]
+IDmat[,2]<-IDmat[,2]*2
+IDmat[,3]<-IDmat[,3]*3
+IDmat[,4]<-IDmat[,4]*4
+
+#Get time column and include num of points in each window
+ztime<-Peru[,1]
+nlag=20
+
+#loop through time with window, id points pi
+nz<-length(ztime)-nlag
+
+#Below is the main movie loop, which advances the time
+#window frame by frame
+#-----------
+for(i in 1:nz){
+v9<-c(i:(i+nlag)) #Indices for current window of pts
+#For each row in IDmat within the window
+#Sum across ID columsn to make a single color/intensity val
+icolvec<-apply(IDmat[v9,],1,sum) 
+#THIS loop sets delay in movie, NOTED FOR ASSIGNMENT 10
+#-----------
+#1. Compute how much time passed between two timestamps
+#2. Multiply by 1000 to convert to about milliseconds
+#3. Then use floor() to make an inteeger
+time.count<-floor(1000*(ztime[i+nlag]-ztime[i+(nlag-1)]))
+#Run a heavy computation loop to make movie appear slower
+for(j in 1:(2*time.count)){
+#Make 100 random normal values
+v1<-rnorm(100)
+#Inner loop doing similar to bootstrap resampling
+#Result is not used, more computation time
+for(k in 1:100){
+	v2<-sample(v1,replace=T)
+	mean(v2)
+}
+}
+#Perumat<-cbind(Peru[,c(1,2,3)],sqrt(Peru[,4]))
+#Plot the current time window
+sctstr<-scatterplot3d(Peru[,c(2,3,4)],type="n")
+sctstr$points3d(Peru[v9,c(2,3,4)],col=icolvec,type="h",lwd=((exp(Peru[v9,5]-4))))
+#print(c(i,nz,ztime[i],ztime[nz]))
+
+}
+print("DONE")
+}
+```
+
+```{r search-setup}
+# mystery2 already loaded
+dat <- as.matrix(mystery2)
+storage.mode(dat) <- "numeric"
+p <- ncol(dat)  # p = 8 variables
+n <- nrow(dat)  # n = 5001 rows
+
+set.seed(1)
+mat_raw <- matrix(rnorm(30 * p), nrow = 30, ncol = p)
+matdir <- orthogonalize(mat_raw)
+```
+
+```{r gui.mvntest}
+gui.mvntest()
+```
+
+```{r gui.orth}
+gui.orth()
+```
+
+```{r gui.explore}
+quartz(width=9, height=7)  #opens a new big plot window
+gui.explore()
+```
+
+```{r analysis before asym}
+asym <- as.matrix(as.numeric(multinomial.usage.data))
+gui.asym() #gotta run as. matrix
+```
