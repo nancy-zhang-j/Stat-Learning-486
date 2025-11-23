@@ -71,4 +71,6 @@ $pvals
  [9,] -0.26636574 -0.2552672
 [10,]  0.26636574  0.2552672
 
+
+> #run with orth as the direction matrix and mystery2 as the data matrix
 > gui.explore()
