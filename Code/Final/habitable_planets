@@ -29,6 +29,10 @@
 [67] "Kepler-443 b"       "K2-332 b"           "Ross 508 b"        
 [70] "Wolf 1069 b"       
 
+> non_habitable = tess$pl_name[tess$pl_name %in% names == FALSE]
+> length(non_habitable)
+[1] 713
+
 Only 5 habitable planets in the TESS dataset. Not a lot so maybe use all 70 habitable planets
 Maybe we just use the rest of the TESS planets as a control group for non-habitable planets to compare
 Might need to filter them more since there are over 700 compared to only 70 habitable
