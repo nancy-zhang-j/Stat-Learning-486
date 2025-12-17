@@ -1,0 +1,35 @@
+> tess = read.csv("C:/Users/kforr/Downloads/PS_2025.12.16_18.04.27.csv", header = TRUE, skip = 99)
+> habitable = read.csv("C:/Users/kforr/Downloads/hwc_table_all.csv", header = TRUE)
+> names = habitable$Name
+> tess$pl_name[tess$pl_name %in% names]
+[1] "TOI-2257 b" "TOI-700 d"  "TOI-700 e"  "TOI-715 b"  "TOI-904 c" 
+> names
+ [1] "TOI-904 c"          "TOI-700 e"          "TOI-700 d"         
+ [4] "GJ 357 d"           "GJ 3293 d"          "GJ 180 c"          
+ [7] "GJ 433 d"           "LP 890-9 c"         "LHS 1140 b"        
+[10] "Teegarden's Star b" "Teegarden's Star c" "Kepler-705 b"      
+[13] "Kepler-452 b"       "Kepler-1649 c"      "K2-9 b"            
+[16] "GJ 367 d"           "Kepler-1544 b"      "Kepler-1410 b"     
+[19] "Kepler-1540 b"      "Kepler-1606 b"      "Kepler-1653 b"     
+[22] "HD 216520 c"        "Kepler-296 f"       "TRAPPIST-1 g"      
+[25] "Kepler-283 c"       "K2-18 b"            "TRAPPIST-1 d"      
+[28] "GJ 1002 b"          "Wolf 1061 c"        "GJ 682 b"          
+[31] "HIP 38594 b"        "GJ 667 C e"         "GJ 667 C f"        
+[34] "TRAPPIST-1 e"       "Kepler-1701 b"      "Kepler-62 e"       
+[37] "GJ 514 b"           "Kepler-62 f"        "TOI-715 b"         
+[40] "GJ 667 C c"         "K2-288 B b"         "Kepler-22 b"       
+[43] "Proxima Cen b"      "K2-3 d"             "Kepler-174 d"      
+[46] "Kepler-440 b"       "Kepler-442 b"       "Ross 128 b"        
+[49] "TOI-2257 b"         "GJ 229 A c"         "GJ 273 b"          
+[52] "GJ 163 c"           "TRAPPIST-1 f"       "GJ 1061 c"         
+[55] "HN Lib b"           "Kepler-1638 b"      "Kepler-1652 b"     
+[58] "Kepler-186 f"       "Kepler-1229 b"      "Kepler-155 c"      
+[61] "GJ 180 d"           "GJ 1002 c"          "HD 40307 g"        
+[64] "GJ 1061 d"          "Kepler-296 e"       "K2-72 e"           
+[67] "Kepler-443 b"       "K2-332 b"           "Ross 508 b"        
+[70] "Wolf 1069 b"       
+
+Only 5 habitable planets in the TESS dataset. Not a lot so maybe use all 70 habitable planets
+Maybe we just use the rest of the TESS planets as a control group for non-habitable planets to compare
+Might need to filter them more since there are over 700 compared to only 70 habitable
+
