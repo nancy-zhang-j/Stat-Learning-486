@@ -40,6 +40,7 @@ Might need to filter them more since there are over 700 compared to only 70 habi
 
 Way more variables in the tess dataset - maybe clean up the data and only use the variables in the habitable catalog?
 Name/pl_name, Detection/discoverymethod, Period/pl_orbper, Radius/pl_rade   Mass and Flux are in different units I think?
+Distance is in light years in habitable worlds catalog, parsecs in tess
 This is with all variables (a lot of data we don't need):
 
 > tess_non_habitable = tess[tess$pl_name %in% non_habitable,]
