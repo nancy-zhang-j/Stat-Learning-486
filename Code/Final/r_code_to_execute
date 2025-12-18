@@ -1,1 +1,5 @@
+tess = read.csv("C:/Users/kforr/Downloads/PS_2025.12.16_18.04.27.csv", header = TRUE, skip = 99)
+habitable = read.csv("C:/Users/kforr/Downloads/hwc_table_all.csv", header = TRUE)
+names = habitable$Name
+tess$pl_name[tess$pl_name %in% names]
 
