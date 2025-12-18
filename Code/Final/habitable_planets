@@ -37,3 +37,413 @@ Only 5 habitable planets in the TESS dataset. Not a lot so maybe use all 70 habi
 Maybe we just use the rest of the TESS planets as a control group for non-habitable planets to compare
 Might need to filter them more since there are over 700 compared to only 70 habitable
 
+
+Way more variables in the tess dataset - maybe clean up the data and only use the variables in the habitable catalog?
+Name/pl_name, Detection/discoverymethod, Period/pl_orbper, Radius/pl_rade   Mass and Flux are in different units I think?
+This is with all variables (a lot of data we don't need):
+
+> tess_non_habitable = tess[tess$pl_name %in% non_habitable,]
+> tess_habitable = tess[tess$pl_name %in% non_habitable,]
+> summary(tess_non_habitable)
+   pl_name            hostname          default_flag    sy_snum     
+ Length:713         Length:713         Min.   :1     Min.   :1.000  
+ Class :character   Class :character   1st Qu.:1     1st Qu.:1.000  
+ Mode  :character   Mode  :character   Median :1     Median :1.000  
+                                       Mean   :1     Mean   :1.126  
+                                       3rd Qu.:1     3rd Qu.:1.000  
+                                       Max.   :1     Max.   :3.000  
+                                                                    
+    sy_pnum      discoverymethod      disc_year    disc_facility     
+ Min.   :1.000   Length:713         Min.   :2018   Length:713        
+ 1st Qu.:1.000   Class :character   1st Qu.:2022   Class :character  
+ Median :1.000   Mode  :character   Median :2023   Mode  :character  
+ Mean   :1.635                      Mean   :2023                     
+ 3rd Qu.:2.000                      3rd Qu.:2024                     
+ Max.   :6.000                      Max.   :2025                     
+                                                                     
+   soltype          pl_controv_flag     pl_refname          pl_orbper        
+ Length:713         Min.   :0.000000   Length:713         Min.   :   0.2382  
+ Class :character   1st Qu.:0.000000   Class :character   1st Qu.:   3.2947  
+ Mode  :character   Median :0.000000   Mode  :character   Median :   5.6905  
+                    Mean   :0.004208                      Mean   :  17.5961  
+                    3rd Qu.:0.000000                      3rd Qu.:  12.2266  
+                    Max.   :1.000000                      Max.   :2800.0000  
+                                                                             
+ pl_orbpererr1      pl_orbpererr2         pl_orbperlim   pl_orbsmax     
+ Min.   :  0.0000   Min.   :-210.00000   Min.   :0     Min.   :0.00622  
+ 1st Qu.:  0.0000   1st Qu.:  -0.00006   1st Qu.:0     1st Qu.:0.03805  
+ Median :  0.0000   Median :  -0.00001   Median :0     Median :0.05900  
+ Mean   :  0.5223   Mean   :  -0.30532   Mean   :0     Mean   :0.09594  
+ 3rd Qu.:  0.0001   3rd Qu.:   0.00000   3rd Qu.:0     3rd Qu.:0.10105  
+ Max.   :360.0000   Max.   :   0.00000   Max.   :0     Max.   :4.28000  
+ NA's   :21         NA's   :21                         NA's   :78       
+ pl_orbsmaxerr1    pl_orbsmaxerr2     pl_orbsmaxlim    pl_rade      
+ Min.   :0.00000   Min.   :-0.21000   Min.   :0     Min.   : 0.566  
+ 1st Qu.:0.00069   1st Qu.:-0.00300   1st Qu.:0     1st Qu.: 2.247  
+ Median :0.00120   Median :-0.00120   Median :0     Median : 3.410  
+ Mean   :0.00324   Mean   :-0.00306   Mean   :0     Mean   : 6.333  
+ 3rd Qu.:0.00299   3rd Qu.:-0.00070   3rd Qu.:0     3rd Qu.:11.097  
+ Max.   :0.36000   Max.   : 0.00000   Max.   :0     Max.   :25.000  
+ NA's   :92        NA's   :92         NA's   :78    NA's   :11      
+  pl_radeerr1      pl_radeerr2         pl_radelim           pl_radj       
+ Min.   :0.0100   Min.   :-7.17375   Min.   :-1.000000   Min.   :0.05049  
+ 1st Qu.:0.0920   1st Qu.:-0.34748   1st Qu.: 0.000000   1st Qu.:0.20046  
+ Median :0.1793   Median :-0.16000   Median : 0.000000   Median :0.30403  
+ Mean   :0.3371   Mean   :-0.30160   Mean   :-0.002849   Mean   :0.56505  
+ 3rd Qu.:0.3649   3rd Qu.:-0.08548   3rd Qu.: 0.000000   3rd Qu.:0.99000  
+ Max.   :9.5276   Max.   :-0.01000   Max.   : 0.000000   Max.   :2.23035  
+ NA's   :18       NA's   :18         NA's   :11          NA's   :11       
+  pl_radjerr1        pl_radjerr2          pl_radjlim          pl_bmasse      
+ Min.   :0.000892   Min.   :-0.640000   Min.   :-1.000000   Min.   :   0.46  
+ 1st Qu.:0.008208   1st Qu.:-0.031000   1st Qu.: 0.000000   1st Qu.:   8.32  
+ Median :0.016000   Median :-0.014274   Median : 0.000000   Median :  34.62  
+ Mean   :0.030063   Mean   :-0.026899   Mean   :-0.002849   Mean   : 313.24  
+ 3rd Qu.:0.032059   3rd Qu.:-0.007626   3rd Qu.: 0.000000   3rd Qu.: 278.89  
+ Max.   :0.850000   Max.   :-0.000892   Max.   : 0.000000   Max.   :7024.01  
+ NA's   :18         NA's   :18          NA's   :11          NA's   :166      
+ pl_bmasseerr1    pl_bmasseerr2       pl_bmasselim       pl_bmassj       
+ Min.   :  0.05   Min.   :-794.571   Min.   :0.00000   Min.   : 0.00145  
+ 1st Qu.:  1.30   1st Qu.: -26.062   1st Qu.:0.00000   1st Qu.: 0.02618  
+ Median :  4.70   Median :  -4.767   Median :0.00000   Median : 0.10893  
+ Mean   : 23.33   Mean   : -23.380   Mean   :0.08592   Mean   : 0.98562  
+ 3rd Qu.: 27.65   3rd Qu.:  -1.300   3rd Qu.:0.00000   3rd Qu.: 0.87750  
+ Max.   :826.35   Max.   :  -0.050   Max.   :1.00000   Max.   :22.10000  
+ NA's   :212      NA's   :212        NA's   :166       NA's   :166       
+ pl_bmassjerr1     pl_bmassjerr2       pl_bmassjlim     pl_bmassprov      
+ Min.   :0.00016   Min.   :-2.50000   Min.   :0.00000   Length:713        
+ 1st Qu.:0.00409   1st Qu.:-0.08200   1st Qu.:0.00000   Class :character  
+ Median :0.01479   Median :-0.01500   Median :0.00000   Mode  :character  
+ Mean   :0.07336   Mean   :-0.07351   Mean   :0.08592                     
+ 3rd Qu.:0.08700   3rd Qu.:-0.00409   3rd Qu.:0.00000                     
+ Max.   :2.60000   Max.   :-0.00016   Max.   :1.00000                     
+ NA's   :212       NA's   :212        NA's   :166                         
+  pl_orbeccen     pl_orbeccenerr1  pl_orbeccenerr2   pl_orbeccenlim  
+ Min.   :0.0000   Min.   :0.0000   Min.   :-0.2600   Min.   :0.0000  
+ 1st Qu.:0.0000   1st Qu.:0.0187   1st Qu.:-0.0520   1st Qu.:0.0000  
+ Median :0.0450   Median :0.0400   Median :-0.0330   Median :0.0000  
+ Mean   :0.1029   Mean   :0.0560   Mean   :-0.0416   Mean   :0.1337  
+ 3rd Qu.:0.1400   3rd Qu.:0.0685   3rd Qu.:-0.0158   3rd Qu.:0.0000  
+ Max.   :0.9412   Max.   :0.4200   Max.   : 0.0000   Max.   :1.0000  
+ NA's   :152      NA's   :401      NA's   :401       NA's   :152     
+    pl_insol         pl_insolerr1       pl_insolerr2        pl_insollim 
+ Min.   :   0.181   Min.   :   0.003   Min.   :-1120.000   Min.   :0    
+ 1st Qu.:  20.750   1st Qu.:   1.400   1st Qu.:  -38.000   1st Qu.:0    
+ Median :  78.214   Median :   8.000   Median :   -7.000   Median :0    
+ Mean   : 402.723   Mean   :  33.856   Mean   :  -31.631   Mean   :0    
+ 3rd Qu.: 577.500   3rd Qu.:  43.000   3rd Qu.:   -1.440   3rd Qu.:0    
+ Max.   :5300.000   Max.   :1120.000   Max.   :   -0.003   Max.   :0    
+ NA's   :361        NA's   :376        NA's   :376         NA's   :361  
+     pl_eqt         pl_eqterr1       pl_eqterr2        pl_eqtlim  
+ Min.   : 163.0   Min.   :  2.00   Min.   :-173.00   Min.   :0    
+ 1st Qu.: 603.6   1st Qu.: 12.00   1st Qu.: -27.00   1st Qu.:0    
+ Median : 885.0   Median : 19.00   Median : -18.00   Median :0    
+ Mean   : 984.3   Mean   : 22.84   Mean   : -22.60   Mean   :0    
+ 3rd Qu.:1329.0   3rd Qu.: 28.00   3rd Qu.: -11.62   3rd Qu.:0    
+ Max.   :3646.0   Max.   :170.00   Max.   :  -1.90   Max.   :0    
+ NA's   :116      NA's   :155      NA's   :155       NA's   :116  
+    ttv_flag        st_refname        st_spectype           st_teff    
+ Min.   :0.00000   Length:713         Length:713         Min.   :2850  
+ 1st Qu.:0.00000   Class :character   Class :character   1st Qu.:4078  
+ Median :0.00000   Mode  :character   Mode  :character   Median :5318  
+ Mean   :0.08135                                         Mean   :5059  
+ 3rd Qu.:0.00000                                         3rd Qu.:5859  
+ Max.   :1.00000                                         Max.   :8500  
+                                                         NA's   :17    
+  st_tefferr1      st_tefferr2        st_tefflim     st_rad      
+ Min.   : 10.00   Min.   :-410.00   Min.   :0    Min.   :0.0131  
+ 1st Qu.: 59.00   1st Qu.:-100.00   1st Qu.:0    1st Qu.:0.6385  
+ Median : 75.00   Median : -74.00   Median :0    Median :0.8790  
+ Mean   : 83.83   Mean   : -82.46   Mean   :0    Mean   :0.9791  
+ 3rd Qu.:100.00   3rd Qu.: -58.00   3rd Qu.:0    3rd Qu.:1.2465  
+ Max.   :720.00   Max.   : -10.00   Max.   :0    Max.   :4.1000  
+ NA's   :32       NA's   :32        NA's   :17   NA's   :2       
+   st_raderr1        st_raderr2         st_radlim    st_mass      
+ Min.   :0.00054   Min.   :-0.21000   Min.   :0   Min.   :0.1180  
+ 1st Qu.:0.01300   1st Qu.:-0.03800   1st Qu.:0   1st Qu.:0.6430  
+ Median :0.02250   Median :-0.02185   Median :0   Median :0.9000  
+ Mean   :0.02936   Mean   :-0.02877   Mean   :0   Mean   :0.8759  
+ 3rd Qu.:0.03900   3rd Qu.:-0.01300   3rd Qu.:0   3rd Qu.:1.1070  
+ Max.   :0.20000   Max.   :-0.00054   Max.   :0   Max.   :1.9000  
+ NA's   :17        NA's   :17         NA's   :2   NA's   :2       
+  st_masserr1       st_masserr2         st_masslim     st_met       
+ Min.   :0.00070   Min.   :-0.22000   Min.   :0    Min.   :-0.7100  
+ 1st Qu.:0.02100   1st Qu.:-0.06000   1st Qu.:0    1st Qu.:-0.0700  
+ Median :0.03500   Median :-0.03400   Median :0    Median : 0.0700  
+ Mean   :0.04473   Mean   :-0.04492   Mean   :0    Mean   : 0.0566  
+ 3rd Qu.:0.06000   3rd Qu.:-0.02100   3rd Qu.:0    3rd Qu.: 0.2000  
+ Max.   :0.22000   Max.   :-0.00070   Max.   :0    Max.   : 0.5200  
+ NA's   :18        NA's   :18         NA's   :2    NA's   :103      
+   st_meterr1        st_meterr2         st_metlim        st_metratio       
+ Min.   :0.01000   Min.   :-0.62500   Min.   :-1.00000   Length:713        
+ 1st Qu.:0.05000   1st Qu.:-0.09000   1st Qu.: 0.00000   Class :character  
+ Median :0.07000   Median :-0.07000   Median : 0.00000   Mode  :character  
+ Mean   :0.08262   Mean   :-0.08241   Mean   :-0.00164                     
+ 3rd Qu.:0.09000   3rd Qu.:-0.05000   3rd Qu.: 0.00000                     
+ Max.   :0.62500   Max.   : 0.00000   Max.   : 1.00000                     
+ NA's   :110       NA's   :110        NA's   :103                          
+    st_logg       st_loggerr1       st_loggerr2         st_logglim      
+ Min.   :3.244   Min.   :0.00000   Min.   :-0.69000   Min.   :-1.00000  
+ 1st Qu.:4.277   1st Qu.:0.02300   1st Qu.:-0.07000   1st Qu.: 0.00000  
+ Median :4.480   Median :0.03700   Median :-0.03900   Median : 0.00000  
+ Mean   :4.472   Mean   :0.05485   Mean   :-0.05558   Mean   :-0.00939  
+ 3rd Qu.:4.640   3rd Qu.:0.07000   3rd Qu.:-0.02400   3rd Qu.: 0.00000  
+ Max.   :7.915   Max.   :0.69000   Max.   : 0.00000   Max.   : 0.00000  
+ NA's   :74      NA's   :93        NA's   :93         NA's   :74        
+  sy_refname           rastr                 ra              decstr         
+ Length:713         Length:713         Min.   :  0.1856   Length:713        
+ Class :character   Class :character   1st Qu.: 80.0669   Class :character  
+ Mode  :character   Mode  :character   Median :160.0659   Mode  :character  
+                                       Mean   :167.9398                     
+                                       3rd Qu.:257.7473                     
+                                       Max.   :359.7934                     
+                                                                            
+      dec              sy_dist         sy_disterr1        sy_disterr2       
+ Min.   :-88.1211   Min.   :  6.869   Min.   : 0.00283   Min.   :-32.53600  
+ 1st Qu.:-42.7630   1st Qu.: 54.070   1st Qu.: 0.10220   1st Qu.: -1.64075  
+ Median :  0.4588   Median :104.158   Median : 0.37100   Median : -0.36850  
+ Mean   :  2.1031   Mean   :159.848   Mean   : 1.70453   Mean   : -1.64851  
+ 3rd Qu.: 49.0468   3rd Qu.:217.102   3rd Qu.: 1.67875   3rd Qu.: -0.10220  
+ Max.   : 86.8603   Max.   :942.122   Max.   :36.67100   Max.   : -0.00283  
+                    NA's   :2         NA's   :3          NA's   :3          
+    sy_vmag        sy_vmagerr1       sy_vmagerr2          sy_kmag      
+ Min.   : 5.650   Min.   :0.00200   Min.   :-1.13300   Min.   : 4.241  
+ 1st Qu.: 9.936   1st Qu.:0.01200   1st Qu.:-0.05700   1st Qu.: 8.034  
+ Median :11.425   Median :0.03000   Median :-0.03000   Median : 9.034  
+ Mean   :11.470   Mean   :0.05138   Mean   :-0.05138   Mean   : 9.023  
+ 3rd Qu.:12.588   3rd Qu.:0.05700   3rd Qu.:-0.01200   3rd Qu.:10.157  
+ Max.   :18.000   Max.   :1.13300   Max.   :-0.00200   Max.   :15.548  
+ NA's   :3        NA's   :3         NA's   :3                          
+  sy_kmagerr1       sy_kmagerr2         sy_gaiamag     sy_gaiamagerr1     
+ Min.   :0.01100   Min.   :-9.99500   Min.   : 5.513   Min.   :0.0001120  
+ 1st Qu.:0.01900   1st Qu.:-0.02300   1st Qu.: 9.754   1st Qu.:0.0002610  
+ Median :0.02100   Median :-0.02100   Median :11.152   Median :0.0003940  
+ Mean   :0.03594   Mean   :-0.03594   Mean   :11.090   Mean   :0.0005015  
+ 3rd Qu.:0.02300   3rd Qu.:-0.01900   3rd Qu.:12.175   3rd Qu.:0.0005860  
+ Max.   :9.99500   Max.   :-0.01100   Max.   :16.958   Max.   :0.0042360  
+ NA's   :2         NA's   :2                                              
+ sy_gaiamagerr2        rowupdate          pl_pubdate        releasedate       
+ Min.   :-0.0042360   Length:713         Length:713         Length:713        
+ 1st Qu.:-0.0005860   Class :character   Class :character   Class :character  
+ Median :-0.0003940   Mode  :character   Mode  :character   Mode  :character  
+ Mean   :-0.0005015                                                           
+ 3rd Qu.:-0.0002610                                                           
+ Max.   :-0.0001120                                                           
+                                                                              
+> summary(tess_habitable)
+   pl_name            hostname          default_flag    sy_snum     
+ Length:713         Length:713         Min.   :1     Min.   :1.000  
+ Class :character   Class :character   1st Qu.:1     1st Qu.:1.000  
+ Mode  :character   Mode  :character   Median :1     Median :1.000  
+                                       Mean   :1     Mean   :1.126  
+                                       3rd Qu.:1     3rd Qu.:1.000  
+                                       Max.   :1     Max.   :3.000  
+                                                                    
+    sy_pnum      discoverymethod      disc_year    disc_facility     
+ Min.   :1.000   Length:713         Min.   :2018   Length:713        
+ 1st Qu.:1.000   Class :character   1st Qu.:2022   Class :character  
+ Median :1.000   Mode  :character   Median :2023   Mode  :character  
+ Mean   :1.635                      Mean   :2023                     
+ 3rd Qu.:2.000                      3rd Qu.:2024                     
+ Max.   :6.000                      Max.   :2025                     
+                                                                     
+   soltype          pl_controv_flag     pl_refname          pl_orbper        
+ Length:713         Min.   :0.000000   Length:713         Min.   :   0.2382  
+ Class :character   1st Qu.:0.000000   Class :character   1st Qu.:   3.2947  
+ Mode  :character   Median :0.000000   Mode  :character   Median :   5.6905  
+                    Mean   :0.004208                      Mean   :  17.5961  
+                    3rd Qu.:0.000000                      3rd Qu.:  12.2266  
+                    Max.   :1.000000                      Max.   :2800.0000  
+                                                                             
+ pl_orbpererr1      pl_orbpererr2         pl_orbperlim   pl_orbsmax     
+ Min.   :  0.0000   Min.   :-210.00000   Min.   :0     Min.   :0.00622  
+ 1st Qu.:  0.0000   1st Qu.:  -0.00006   1st Qu.:0     1st Qu.:0.03805  
+ Median :  0.0000   Median :  -0.00001   Median :0     Median :0.05900  
+ Mean   :  0.5223   Mean   :  -0.30532   Mean   :0     Mean   :0.09594  
+ 3rd Qu.:  0.0001   3rd Qu.:   0.00000   3rd Qu.:0     3rd Qu.:0.10105  
+ Max.   :360.0000   Max.   :   0.00000   Max.   :0     Max.   :4.28000  
+ NA's   :21         NA's   :21                         NA's   :78       
+ pl_orbsmaxerr1    pl_orbsmaxerr2     pl_orbsmaxlim    pl_rade      
+ Min.   :0.00000   Min.   :-0.21000   Min.   :0     Min.   : 0.566  
+ 1st Qu.:0.00069   1st Qu.:-0.00300   1st Qu.:0     1st Qu.: 2.247  
+ Median :0.00120   Median :-0.00120   Median :0     Median : 3.410  
+ Mean   :0.00324   Mean   :-0.00306   Mean   :0     Mean   : 6.333  
+ 3rd Qu.:0.00299   3rd Qu.:-0.00070   3rd Qu.:0     3rd Qu.:11.097  
+ Max.   :0.36000   Max.   : 0.00000   Max.   :0     Max.   :25.000  
+ NA's   :92        NA's   :92         NA's   :78    NA's   :11      
+  pl_radeerr1      pl_radeerr2         pl_radelim           pl_radj       
+ Min.   :0.0100   Min.   :-7.17375   Min.   :-1.000000   Min.   :0.05049  
+ 1st Qu.:0.0920   1st Qu.:-0.34748   1st Qu.: 0.000000   1st Qu.:0.20046  
+ Median :0.1793   Median :-0.16000   Median : 0.000000   Median :0.30403  
+ Mean   :0.3371   Mean   :-0.30160   Mean   :-0.002849   Mean   :0.56505  
+ 3rd Qu.:0.3649   3rd Qu.:-0.08548   3rd Qu.: 0.000000   3rd Qu.:0.99000  
+ Max.   :9.5276   Max.   :-0.01000   Max.   : 0.000000   Max.   :2.23035  
+ NA's   :18       NA's   :18         NA's   :11          NA's   :11       
+  pl_radjerr1        pl_radjerr2          pl_radjlim          pl_bmasse      
+ Min.   :0.000892   Min.   :-0.640000   Min.   :-1.000000   Min.   :   0.46  
+ 1st Qu.:0.008208   1st Qu.:-0.031000   1st Qu.: 0.000000   1st Qu.:   8.32  
+ Median :0.016000   Median :-0.014274   Median : 0.000000   Median :  34.62  
+ Mean   :0.030063   Mean   :-0.026899   Mean   :-0.002849   Mean   : 313.24  
+ 3rd Qu.:0.032059   3rd Qu.:-0.007626   3rd Qu.: 0.000000   3rd Qu.: 278.89  
+ Max.   :0.850000   Max.   :-0.000892   Max.   : 0.000000   Max.   :7024.01  
+ NA's   :18         NA's   :18          NA's   :11          NA's   :166      
+ pl_bmasseerr1    pl_bmasseerr2       pl_bmasselim       pl_bmassj       
+ Min.   :  0.05   Min.   :-794.571   Min.   :0.00000   Min.   : 0.00145  
+ 1st Qu.:  1.30   1st Qu.: -26.062   1st Qu.:0.00000   1st Qu.: 0.02618  
+ Median :  4.70   Median :  -4.767   Median :0.00000   Median : 0.10893  
+ Mean   : 23.33   Mean   : -23.380   Mean   :0.08592   Mean   : 0.98562  
+ 3rd Qu.: 27.65   3rd Qu.:  -1.300   3rd Qu.:0.00000   3rd Qu.: 0.87750  
+ Max.   :826.35   Max.   :  -0.050   Max.   :1.00000   Max.   :22.10000  
+ NA's   :212      NA's   :212        NA's   :166       NA's   :166       
+ pl_bmassjerr1     pl_bmassjerr2       pl_bmassjlim     pl_bmassprov      
+ Min.   :0.00016   Min.   :-2.50000   Min.   :0.00000   Length:713        
+ 1st Qu.:0.00409   1st Qu.:-0.08200   1st Qu.:0.00000   Class :character  
+ Median :0.01479   Median :-0.01500   Median :0.00000   Mode  :character  
+ Mean   :0.07336   Mean   :-0.07351   Mean   :0.08592                     
+ 3rd Qu.:0.08700   3rd Qu.:-0.00409   3rd Qu.:0.00000                     
+ Max.   :2.60000   Max.   :-0.00016   Max.   :1.00000                     
+ NA's   :212       NA's   :212        NA's   :166                         
+  pl_orbeccen     pl_orbeccenerr1  pl_orbeccenerr2   pl_orbeccenlim  
+ Min.   :0.0000   Min.   :0.0000   Min.   :-0.2600   Min.   :0.0000  
+ 1st Qu.:0.0000   1st Qu.:0.0187   1st Qu.:-0.0520   1st Qu.:0.0000  
+ Median :0.0450   Median :0.0400   Median :-0.0330   Median :0.0000  
+ Mean   :0.1029   Mean   :0.0560   Mean   :-0.0416   Mean   :0.1337  
+ 3rd Qu.:0.1400   3rd Qu.:0.0685   3rd Qu.:-0.0158   3rd Qu.:0.0000  
+ Max.   :0.9412   Max.   :0.4200   Max.   : 0.0000   Max.   :1.0000  
+ NA's   :152      NA's   :401      NA's   :401       NA's   :152     
+    pl_insol         pl_insolerr1       pl_insolerr2        pl_insollim 
+ Min.   :   0.181   Min.   :   0.003   Min.   :-1120.000   Min.   :0    
+ 1st Qu.:  20.750   1st Qu.:   1.400   1st Qu.:  -38.000   1st Qu.:0    
+ Median :  78.214   Median :   8.000   Median :   -7.000   Median :0    
+ Mean   : 402.723   Mean   :  33.856   Mean   :  -31.631   Mean   :0    
+ 3rd Qu.: 577.500   3rd Qu.:  43.000   3rd Qu.:   -1.440   3rd Qu.:0    
+ Max.   :5300.000   Max.   :1120.000   Max.   :   -0.003   Max.   :0    
+ NA's   :361        NA's   :376        NA's   :376         NA's   :361  
+     pl_eqt         pl_eqterr1       pl_eqterr2        pl_eqtlim  
+ Min.   : 163.0   Min.   :  2.00   Min.   :-173.00   Min.   :0    
+ 1st Qu.: 603.6   1st Qu.: 12.00   1st Qu.: -27.00   1st Qu.:0    
+ Median : 885.0   Median : 19.00   Median : -18.00   Median :0    
+ Mean   : 984.3   Mean   : 22.84   Mean   : -22.60   Mean   :0    
+ 3rd Qu.:1329.0   3rd Qu.: 28.00   3rd Qu.: -11.62   3rd Qu.:0    
+ Max.   :3646.0   Max.   :170.00   Max.   :  -1.90   Max.   :0    
+ NA's   :116      NA's   :155      NA's   :155       NA's   :116  
+    ttv_flag        st_refname        st_spectype           st_teff    
+ Min.   :0.00000   Length:713         Length:713         Min.   :2850  
+ 1st Qu.:0.00000   Class :character   Class :character   1st Qu.:4078  
+ Median :0.00000   Mode  :character   Mode  :character   Median :5318  
+ Mean   :0.08135                                         Mean   :5059  
+ 3rd Qu.:0.00000                                         3rd Qu.:5859  
+ Max.   :1.00000                                         Max.   :8500  
+                                                         NA's   :17    
+  st_tefferr1      st_tefferr2        st_tefflim     st_rad      
+ Min.   : 10.00   Min.   :-410.00   Min.   :0    Min.   :0.0131  
+ 1st Qu.: 59.00   1st Qu.:-100.00   1st Qu.:0    1st Qu.:0.6385  
+ Median : 75.00   Median : -74.00   Median :0    Median :0.8790  
+ Mean   : 83.83   Mean   : -82.46   Mean   :0    Mean   :0.9791  
+ 3rd Qu.:100.00   3rd Qu.: -58.00   3rd Qu.:0    3rd Qu.:1.2465  
+ Max.   :720.00   Max.   : -10.00   Max.   :0    Max.   :4.1000  
+ NA's   :32       NA's   :32        NA's   :17   NA's   :2       
+   st_raderr1        st_raderr2         st_radlim    st_mass      
+ Min.   :0.00054   Min.   :-0.21000   Min.   :0   Min.   :0.1180  
+ 1st Qu.:0.01300   1st Qu.:-0.03800   1st Qu.:0   1st Qu.:0.6430  
+ Median :0.02250   Median :-0.02185   Median :0   Median :0.9000  
+ Mean   :0.02936   Mean   :-0.02877   Mean   :0   Mean   :0.8759  
+ 3rd Qu.:0.03900   3rd Qu.:-0.01300   3rd Qu.:0   3rd Qu.:1.1070  
+ Max.   :0.20000   Max.   :-0.00054   Max.   :0   Max.   :1.9000  
+ NA's   :17        NA's   :17         NA's   :2   NA's   :2       
+  st_masserr1       st_masserr2         st_masslim     st_met       
+ Min.   :0.00070   Min.   :-0.22000   Min.   :0    Min.   :-0.7100  
+ 1st Qu.:0.02100   1st Qu.:-0.06000   1st Qu.:0    1st Qu.:-0.0700  
+ Median :0.03500   Median :-0.03400   Median :0    Median : 0.0700  
+ Mean   :0.04473   Mean   :-0.04492   Mean   :0    Mean   : 0.0566  
+ 3rd Qu.:0.06000   3rd Qu.:-0.02100   3rd Qu.:0    3rd Qu.: 0.2000  
+ Max.   :0.22000   Max.   :-0.00070   Max.   :0    Max.   : 0.5200  
+ NA's   :18        NA's   :18         NA's   :2    NA's   :103      
+   st_meterr1        st_meterr2         st_metlim        st_metratio       
+ Min.   :0.01000   Min.   :-0.62500   Min.   :-1.00000   Length:713        
+ 1st Qu.:0.05000   1st Qu.:-0.09000   1st Qu.: 0.00000   Class :character  
+ Median :0.07000   Median :-0.07000   Median : 0.00000   Mode  :character  
+ Mean   :0.08262   Mean   :-0.08241   Mean   :-0.00164                     
+ 3rd Qu.:0.09000   3rd Qu.:-0.05000   3rd Qu.: 0.00000                     
+ Max.   :0.62500   Max.   : 0.00000   Max.   : 1.00000                     
+ NA's   :110       NA's   :110        NA's   :103                          
+    st_logg       st_loggerr1       st_loggerr2         st_logglim      
+ Min.   :3.244   Min.   :0.00000   Min.   :-0.69000   Min.   :-1.00000  
+ 1st Qu.:4.277   1st Qu.:0.02300   1st Qu.:-0.07000   1st Qu.: 0.00000  
+ Median :4.480   Median :0.03700   Median :-0.03900   Median : 0.00000  
+ Mean   :4.472   Mean   :0.05485   Mean   :-0.05558   Mean   :-0.00939  
+ 3rd Qu.:4.640   3rd Qu.:0.07000   3rd Qu.:-0.02400   3rd Qu.: 0.00000  
+ Max.   :7.915   Max.   :0.69000   Max.   : 0.00000   Max.   : 0.00000  
+ NA's   :74      NA's   :93        NA's   :93         NA's   :74        
+  sy_refname           rastr                 ra              decstr         
+ Length:713         Length:713         Min.   :  0.1856   Length:713        
+ Class :character   Class :character   1st Qu.: 80.0669   Class :character  
+ Mode  :character   Mode  :character   Median :160.0659   Mode  :character  
+                                       Mean   :167.9398                     
+                                       3rd Qu.:257.7473                     
+                                       Max.   :359.7934                     
+                                                                            
+      dec              sy_dist         sy_disterr1        sy_disterr2       
+ Min.   :-88.1211   Min.   :  6.869   Min.   : 0.00283   Min.   :-32.53600  
+ 1st Qu.:-42.7630   1st Qu.: 54.070   1st Qu.: 0.10220   1st Qu.: -1.64075  
+ Median :  0.4588   Median :104.158   Median : 0.37100   Median : -0.36850  
+ Mean   :  2.1031   Mean   :159.848   Mean   : 1.70453   Mean   : -1.64851  
+ 3rd Qu.: 49.0468   3rd Qu.:217.102   3rd Qu.: 1.67875   3rd Qu.: -0.10220  
+ Max.   : 86.8603   Max.   :942.122   Max.   :36.67100   Max.   : -0.00283  
+                    NA's   :2         NA's   :3          NA's   :3          
+    sy_vmag        sy_vmagerr1       sy_vmagerr2          sy_kmag      
+ Min.   : 5.650   Min.   :0.00200   Min.   :-1.13300   Min.   : 4.241  
+ 1st Qu.: 9.936   1st Qu.:0.01200   1st Qu.:-0.05700   1st Qu.: 8.034  
+ Median :11.425   Median :0.03000   Median :-0.03000   Median : 9.034  
+ Mean   :11.470   Mean   :0.05138   Mean   :-0.05138   Mean   : 9.023  
+ 3rd Qu.:12.588   3rd Qu.:0.05700   3rd Qu.:-0.01200   3rd Qu.:10.157  
+ Max.   :18.000   Max.   :1.13300   Max.   :-0.00200   Max.   :15.548  
+ NA's   :3        NA's   :3         NA's   :3                          
+  sy_kmagerr1       sy_kmagerr2         sy_gaiamag     sy_gaiamagerr1     
+ Min.   :0.01100   Min.   :-9.99500   Min.   : 5.513   Min.   :0.0001120  
+ 1st Qu.:0.01900   1st Qu.:-0.02300   1st Qu.: 9.754   1st Qu.:0.0002610  
+ Median :0.02100   Median :-0.02100   Median :11.152   Median :0.0003940  
+ Mean   :0.03594   Mean   :-0.03594   Mean   :11.090   Mean   :0.0005015  
+ 3rd Qu.:0.02300   3rd Qu.:-0.01900   3rd Qu.:12.175   3rd Qu.:0.0005860  
+ Max.   :9.99500   Max.   :-0.01100   Max.   :16.958   Max.   :0.0042360  
+ NA's   :2         NA's   :2                                              
+ sy_gaiamagerr2        rowupdate          pl_pubdate        releasedate       
+ Min.   :-0.0042360   Length:713         Length:713         Length:713        
+ 1st Qu.:-0.0005860   Class :character   Class :character   Class :character  
+ Median :-0.0003940   Mode  :character   Mode  :character   Mode  :character  
+ Mean   :-0.0005015                                                           
+ 3rd Qu.:-0.0002610                                                           
+ Max.   :-0.0001120                                                           
+                                                                              
+> summary(habitable)
+     Name               Type           Detection.Method  
+ Length:70          Length:70          Length:70         
+ Class :character   Class :character   Class :character  
+ Mode  :character   Mode  :character   Mode  :character  
+                                                         
+                                                         
+                                                         
+                                                         
+ Mass.br..M.sub.E..sub.. Radius.br..R.sub.E..sub.. Flux.br..S.sub.E..sub..
+ Min.   : 0.388          Min.   :0.788             Min.   :0.2523         
+ 1st Qu.: 2.203          1st Qu.:1.302             1st Qu.:0.5342         
+ Median : 4.060          Median :1.780             Median :0.8514         
+ Mean   : 5.289          Mean   :1.771             Mean   :0.8663         
+ 3rd Qu.: 5.680          3rd Qu.:2.199             3rd Qu.:1.2112         
+ Max.   :36.000          Max.   :3.030             Max.   :1.6360         
+                                                                          
+ X.i.T.sub.surf..sub...i..br..K. Period.br..days.  Distance.br..ly.  
+ Min.   :198.9                   Min.   :  4.049   Min.   :   4.244  
+ 1st Qu.:245.3                   1st Qu.: 18.500   1st Qu.:  29.848  
+ Median :275.6                   Median : 36.770   Median : 101.521  
+ Mean   :269.5                   Mean   : 73.922   Mean   : 511.267  
+ 3rd Qu.:298.7                   3rd Qu.:110.804   3rd Qu.: 816.173  
+ Max.   :325.4                   Max.   :384.843   Max.   :4975.575  
+                                                                     
+  Age.br..Gy.         ESI        
+ Min.   :0.400   Min.   :0.4755  
+ 1st Qu.:2.000   1st Qu.:0.6587  
+ Median :4.000   Median :0.7290  
+ Mean   :3.891   Mean   :0.7387  
+ 3rd Qu.:6.000   3rd Qu.:0.8273  
+ Max.   :8.000   Max.   :0.9684  
+ NA's   :21                      
