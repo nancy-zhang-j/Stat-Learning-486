@@ -19,3 +19,4 @@ full_dataset$habitable = c(1:length(full_dataset$habitable))
 full_dataset$habitable = full_dataset$pl_name %in% names
 #drop some columns we don't need
 full_dataset = subset(full_dataset, select = -c(pl_pubdate, releasedate, rowupdate))
+full_dataset = subset(full_dataset, select = -c(pl_radj)) #same information as pl_rade, just different units
