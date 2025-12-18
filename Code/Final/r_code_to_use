@@ -1,0 +1,19 @@
+tess = read.csv("C:/Users/kforr/Downloads/PS_2025.12.16_18.04.27.csv", header = TRUE, skip = 99)
+habitable = read.csv("C:/Users/kforr/Downloads/hwc_table_all.csv", header = TRUE)
+names = habitable$Name
+tess$pl_name[tess$pl_name %in% names]
+names
+non_habitable = tess$pl_name[tess$pl_name %in% names == FALSE]
+length(non_habitable)
+tess_non_habitable = tess[tess$pl_name %in% non_habitable,]
+tess_habitable = tess[tess$pl_name %in% non_habitable,]
+#summary(tess_non_habitable)
+#summary(tess_habitable)
+summary(habitable)
+full_dataset = read.csv("C:/Users/kforr/Downloads/PS_2025.12.18_11.22.50.csv", header = TRUE, skip = 96)
+confirmed_habitable = full_dataset[full_dataset$pl_name %in% habitable,]
+#summary(confirmed_habitable)
+confirmed_habitable$pl_name
+#add a column indicating whether the planet is habitable
+full_dataset$habitable = c(1:length(full_dataset$habitable))
+full_dataset$habitable = full_dataset$pl_name %in% names
