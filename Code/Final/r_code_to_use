@@ -19,4 +19,5 @@ full_dataset$habitable = c(1:length(full_dataset$habitable))
 full_dataset$habitable = full_dataset$pl_name %in% names
 #drop some columns we don't need
 full_dataset = subset(full_dataset, select = -c(pl_pubdate, releasedate, rowupdate))
-full_dataset = subset(full_dataset, select = -c(pl_radj)) #same information as pl_rade, just different units
+full_dataset = subset(full_dataset, select = -c(pl_radj, pl_radjerr1, pl_radjerr2, pl_radjlim)) #redundant data, just in different units
+full_dataset = subset(full_dataset, select = -c(pl_bmassj, pl_bmassjerr1, pl_bmassjerr2, pl_bmassjlim)) #redundant data, just in different units
