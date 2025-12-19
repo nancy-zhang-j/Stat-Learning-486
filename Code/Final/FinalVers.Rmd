@@ -1,0 +1,632 @@
+---
+title: "Final Project"
+author: "Nancy Zhang and Kyle Forrester"
+date: "2025-12-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+library(pROC)
+library(randomForest)
+```
+
+```{r load-data}
+exoplanets_raw <- read_csv("/Users/nancyz/Downloads/PS_2025.12.18_08.42.33.csv") |> clean_names()
+```
+
+```{r setup-data}
+exoplanets_raw <- read_csv("/Users/nancyz/Downloads/PS_2025.12.18_09.20.30.csv", 
+  show_col_types = FALSE) |>
+  clean_names()
+
+#-------------------------
+#1. Deduplicate to one row per planet
+#Keep the row with the most non-missing entries for each pl_name
+#-------------------------
+exoplanets_1row <- exoplanets_raw |>
+  mutate(non_missing = rowSums(!is.na(across(everything())))) |>
+  arrange(pl_name, desc(non_missing)) |>
+  group_by(pl_name) |>
+  slice(1) |>
+  ungroup() |>
+  select(-non_missing)
+
+cat("Unique planets after dedup:", n_distinct(exoplanets_1row$pl_name), "\n")
+cat("Rows after dedup:", nrow(exoplanets_1row), "\n\n")
+
+#-------------------------
+#2) Add habitability label from external catalog (HWC)
+#habitable = 1 if planet is listed in HWC, else 0
+#-------------------------
+habitable_catalog_raw <- read_csv(
+  "/Users/nancyz/Downloads/hwc_table_all.csv",
+  show_col_types = FALSE
+) |>
+  clean_names()
+
+#Standardize names for joining
+habitable_names <- habitable_catalog_raw |>
+  transmute(
+    pl_name = str_squish(name) |> str_replace_all("\\s+", " ")
+  ) |>
+  distinct()
+
+exoplanets_labeled <- exoplanets_1row |>
+  mutate(
+    pl_name = str_squish(pl_name) |> str_replace_all("\\s+", " ")
+  ) |>
+  left_join(
+    habitable_names |> mutate(habitable = 1),
+    by = "pl_name"
+  ) |>
+  mutate(
+    habitable = replace_na(habitable, 0)
+  )
+
+cat("Class balance (habitable = HWC catalog label):\n")
+print(table(exoplanets_labeled$habitable, useNA = "ifany"))
+cat("\n")
+
+cat("Habitable planets found in NASA table:", sum(exoplanets_labeled$habitable == 1), "\n")
+```
+
+```{r build}
+#-------------------------
+#3) Build modeling dataset (choose predictors)
+#-------------------------
+#Model A: include core planetary + stellar parameters
+model_A <- exoplanets_labeled |>
+  filter(
+    !is.na(pl_rade),
+    !is.na(pl_orbper),
+    !is.na(pl_orbsmax),
+    !is.na(pl_insol),
+    !is.na(pl_eqt),
+    !is.na(st_teff),
+    !is.na(st_rad),
+    !is.na(st_mass),
+    !is.na(sy_snum),
+    !is.na(sy_pnum)
+  ) |>
+  select(
+    habitable,
+    #Planet (high coverage)
+    pl_rade,
+    pl_orbper,
+    pl_orbsmax,
+    pl_insol,
+    pl_eqt,
+    #Star (high coverage)
+    st_teff,
+    st_rad,
+    st_mass,
+    #System context
+    sy_snum,
+    sy_pnum
+  )
+
+#Model B: "reduced leakage" (excludes pl_rade, pl_insol, pl_eqt)
+model_B <- exoplanets_labeled |>
+  filter(
+    !is.na(pl_bmasse),
+    !is.na(pl_orbper),
+    !is.na(pl_orbsmax),
+    !is.na(pl_orbeccen),
+    !is.na(st_teff),
+    !is.na(st_rad),
+    !is.na(st_mass),
+    !is.na(st_logg),
+    !is.na(st_age),
+    !is.na(sy_snum),
+    !is.na(sy_pnum)
+  ) |>
+  select(
+    habitable,
+    #Planet parameters (exclude pl_rade, pl_insol, pl_eqt)
+    pl_bmasse, pl_dens, pl_orbper, pl_orbsmax, pl_orbeccen,
+    #Stellar parameters
+    st_teff, st_rad, st_mass, st_met, st_logg, st_age,
+    #System context
+    sy_snum, sy_pnum
+  ) |>
+  drop_na()
+
+cat("Rows usable (Model A):", nrow(model_A), "\n")
+cat("Rows usable (Model B):", nrow(model_B), "\n\n")
+```
+
+```{r model selection}
+#-------------------------
+#Option B1: AIC Stepwise Selection on Model B
+#-------------------------
+library(pROC)
+
+# Ensure response is factor 0/1
+dfB <- model_B |>
+  mutate(habitable = factor(habitable, levels = c(0, 1)))
+
+# Stratified train/test split (repeatable)
+set.seed(214)
+idx0_B <- which(dfB$habitable == "0")
+idx1_B <- which(dfB$habitable == "1")
+
+train_frac <- 0.7
+train_idx_B <- c(
+  sample(idx0_B, floor(train_frac * length(idx0_B))),
+  sample(idx1_B, floor(train_frac * length(idx1_B)))
+)
+
+train_B <- dfB[train_idx_B, ]
+test_B  <- dfB[-train_idx_B, ]
+
+cat("Model B Train class balance:\n"); print(table(train_B$habitable))
+cat("Model B Test class balance:\n");  print(table(test_B$habitable))
+
+# Full logistic model on Model B
+logit_full_B <- glm(habitable ~ ., data = train_B, family = binomial)
+
+# AIC stepwise selection (both directions) on TRAIN only
+logit_step_B <- step(logit_full_B, direction = "both", trace = 0)
+
+cat("\nSelected formula (Model B):\n")
+print(formula(logit_step_B))
+
+cat("\nAIC comparison (Model B, train):\n")
+print(AIC(logit_full_B, logit_step_B))
+
+# Evaluate on TEST
+prob_step_B <- predict(logit_step_B, newdata = test_B, type = "response")
+
+actual_B <- factor(as.character(test_B$habitable), levels = c("0", "1"))
+pred_B   <- factor(if_else(prob_step_B >= 0.5, "1", "0"), levels = c("0", "1"))
+
+cm_B <- table(Predicted = pred_B, Actual = actual_B)
+acc_B <- mean(pred_B == actual_B)
+precision_B <- cm_B["1", "1"] / sum(cm_B["1", ])
+
+roc_B <- roc(actual_B, prob_step_B, quiet = TRUE)
+auc_B <- as.numeric(auc(roc_B))
+
+tibble(
+  model = "Logistic (Stepwise AIC, Model B)",
+  accuracy = acc_B,
+  auc = auc_B,
+  precision = precision_B
+)
+
+comparison <- bind_rows(
+  comparison,
+  tibble(
+    model = "Logistic (Stepwise AIC, Model B)",
+    accuracy = acc_B,
+    auc = auc_B,
+    precision = precision_B
+  )
+)
+comparison
+
+```
+
+```{r exploratory}
+#-------------------------
+#Exploratory Data Analysis
+#-------------------------
+#Key predictors (before drop_na)
+eda_key <- exoplanets_labeled |>
+  select(
+    habitable,
+    pl_rade, pl_orbper, pl_orbsmax, pl_insol, pl_eqt,
+    st_teff, st_rad, st_mass,
+    sy_snum, sy_pnum,
+    sy_dist
+  )
+
+missing_summary <- eda_key |>
+  summarise(across(everything(), ~ mean(is.na(.)))) |>
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "missing_frac") |>
+  arrange(desc(missing_frac))
+
+cat("Missingness fraction for selected variables:\n")
+print(missing_summary)
+
+#Distributions of key predictors 
+model_A_long <- model_A |>
+  pivot_longer(
+    cols = -habitable,
+    names_to = "variable",
+    values_to = "value"
+  )
+
+ggplot(model_A_long, aes(x = value)) +
+  geom_histogram(bins = 40) +
+  facet_wrap(~ variable, scales = "free") +
+  labs(
+    title = "Distributions of Model A Predictors (Complete-Case Subset)",
+    x = "Value",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+#Log-scaled distributions for highly skewed variables
+model_A_skew <- model_A |>
+  transmute(
+    habitable,
+    log_pl_orbper  = log10(pl_orbper),
+    log_pl_orbsmax = log10(pl_orbsmax),
+    log_pl_insol   = log10(pl_insol)
+  ) |>
+  pivot_longer(cols = -habitable, names_to = "variable", values_to = "value")
+
+ggplot(model_A_skew, aes(x = value)) +
+  geom_histogram(bins = 40) +
+  facet_wrap(~ variable, scales = "free") +
+  labs(
+    title = "Log10-Transformed Distributions (Skewed Predictors)",
+    x = "Log10(Value)",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+#Scatterplots with smoothers 
+ggplot(exoplanets_labeled, aes(x = pl_rade, y = pl_eqt, color = factor(habitable))) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(se = FALSE, method = "loess") +
+  labs(
+    title = "Planet Radius vs Equilibrium Temperature",
+    x = "Planet Radius (Earth radii)",
+    y = "Equilibrium Temperature (K)",
+    color = "Habitable (proxy)"
+  ) +
+  theme_minimal()
+
+ggplot(exoplanets_labeled, aes(x = pl_insol, y = pl_rade, color = factor(habitable))) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(se = FALSE, method = "loess") +
+  scale_x_log10() +
+  labs(
+    title = "Insolation vs Planet Radius (log scale on insolation)",
+    x = "Insolation (Earth flux, log10 scale)",
+    y = "Planet Radius (Earth radii)",
+    color = "Habitable (proxy)"
+  ) +
+  theme_minimal()
+
+ggplot(exoplanets_labeled, aes(x = st_teff, y = pl_eqt, color = factor(habitable))) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(se = FALSE, method = "loess") +
+  labs(
+    title = "Stellar Temperature vs Planet Equilibrium Temperature",
+    x = "Stellar Effective Temperature (K)",
+    y = "Planet Equilibrium Temperature (K)",
+    color = "Habitable (proxy)"
+  ) +
+  theme_minimal()
+
+#Correlation heatmap among Model A predictors 
+cor_mat <- model_A |>
+  select(-habitable) |>
+  cor()
+
+cor_df <- as.data.frame(cor_mat) |>
+  rownames_to_column("var1") |>
+  pivot_longer(cols = -var1, names_to = "var2", values_to = "correlation")
+
+ggplot(cor_df, aes(x = var1, y = var2, fill = correlation)) +
+  geom_tile() +
+  scale_fill_gradient2(limits = c(-1, 1)) +
+  labs(
+    title = "Correlation Heatmap (Model A Predictors)",
+    x = "",
+    y = "",
+    fill = "Corr"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r q2-full-code}
+#-------------------------
+#Random Forest + Comparison to Logistic Regression
+#-------------------------
+library(pROC)
+library(randomForest)
+
+#Make sure response is a factor with levels 0/1
+df <- model_A |>
+  mutate(habitable = factor(habitable, levels = c(0, 1)))
+
+#Stratified train/test split 
+set.seed(214)
+idx0 <- which(df$habitable == "0")
+idx1 <- which(df$habitable == "1")
+
+train_frac <- 0.7
+train_idx <- c(
+  sample(idx0, floor(train_frac * length(idx0))),
+  sample(idx1, floor(train_frac * length(idx1)))
+)
+
+train <- df[train_idx, ]
+test  <- df[-train_idx, ]
+
+cat("Train class balance:\n"); print(table(train$habitable))
+cat("Test class balance:\n");  print(table(test$habitable))
+
+#-------------------------
+#1. Logistic Regression (baseline)
+#-------------------------
+logit_fit <- glm(habitable ~ ., data = train, family = binomial)
+
+logit_prob <- predict(logit_fit, newdata = test, type = "response")
+
+#Use fixed-level factors so table rows/cols don't disappear
+actual_fac <- factor(as.character(test$habitable), levels = c("0", "1"))
+logit_pred_fac <- factor(if_else(logit_prob >= 0.5, "1", "0"), levels = c("0", "1"))
+
+logit_cm <- table(Predicted = logit_pred_fac, Actual = actual_fac)
+logit_precision <- logit_cm["1", "1"] / sum(logit_cm["1", ])
+logit_acc <- mean(logit_pred_fac == actual_fac)
+
+logit_roc <- roc(actual_fac, logit_prob, quiet = TRUE)
+logit_auc <- as.numeric(auc(logit_roc))
+#-------------------------
+#2. Random Forest
+#-------------------------
+tab_train <- table(train$habitable)
+
+classwt_train <- c("0" = 1, "1" = as.numeric(tab_train["0"] / tab_train["1"]))
+
+rf_fit <- randomForest(
+  habitable ~ .,
+  data = train,
+  ntree = 500,
+  mtry = floor(sqrt(ncol(train) - 1)),
+  importance = TRUE,
+  classwt = classwt_train
+)
+#Random forest predicted probabilities for class "1"
+rf_prob <- predict(rf_fit, newdata = test, type = "prob")[, "1"]
+
+rf_pred_fac <- factor(if_else(rf_prob >= 0.5, "1", "0"), levels = c("0", "1"))
+rf_cm <- table(Predicted = rf_pred_fac, Actual = actual_fac)
+
+rf_precision <- rf_cm["1", "1"] / sum(rf_cm["1", ])
+rf_acc <- mean(rf_pred_fac == actual_fac)
+
+rf_roc <- roc(actual_fac, rf_prob, quiet = TRUE)
+rf_auc <- as.numeric(auc(rf_roc))
+#-------------------------
+#3. Comparison table
+#-------------------------
+comparison <- tibble(
+  model = c("Logistic Regression", "Random Forest"),
+  accuracy = c(logit_acc, rf_acc),
+  auc = c(logit_auc, rf_auc),
+  precision = c(logit_precision, rf_precision)
+)
+
+comparison
+
+#-------------------------
+#4. Plot ROC curves together
+#-------------------------
+plot(logit_roc, main = "ROC Curves: Logistic vs Random Forest")
+plot(rf_roc, add = TRUE)
+legend(
+  "bottomright",
+  legend = c(
+    paste0("Logistic AUC = ", round(logit_auc, 3)),
+    paste0("RF AUC = ", round(rf_auc, 3))
+  ),
+  lty = 1
+)
+
+#-------------------------
+#5. Random Forest Variable Importance
+#-------------------------
+imp <- importance(rf_fit) |> as.data.frame() |> rownames_to_column("variable")
+
+#Prefer MeanDecreaseGini for classification importance
+imp_ranked <- imp |>
+  arrange(desc(MeanDecreaseGini))
+
+imp_ranked
+
+#Optional importance plot
+varImpPlot(rf_fit, main = "Random Forest Variable Importance")
+```
+
+
+```{r q3-full-code}
+#-------------------------
+#Variable Importance
+#-------------------------
+
+#Standardize predictors so coefficients are comparable
+model_A_scaled <- model_A |>
+  mutate(
+    habitable = as.integer(habitable),
+    across(-habitable, ~ as.numeric(scale(.)))
+  )
+
+#Refit logistic regression on standardized data
+logit_scaled <- glm(
+  habitable ~ .,
+  data = model_A_scaled,
+  family = binomial
+)
+
+#Extract coefficient table
+coef_table <- summary(logit_scaled)$coefficients |>
+  as.data.frame() |>
+  rownames_to_column("variable") |>
+  filter(variable != "(Intercept)") |>
+  mutate(
+    importance = abs(Estimate),
+    direction = if_else(Estimate > 0, "Positive", "Negative")
+  ) |>
+  arrange(desc(importance))
+
+coef_table
+```
+
+```{r q3-visuals}
+ggplot(
+  coef_table,
+  aes(
+    x = fct_reorder(variable, importance),
+    y = importance,
+    fill = direction
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Variable Importance (Standardized Logistic Regression Coefficients)",
+    x = "Predictor",
+    y = "Absolute Standardized Coefficient"
+  ) +
+  theme_minimal()
+```
+
+```{r q4-full-code}
+#-------------------------
+#Question 4: False Discovery Rate (FDR)
+#-------------------------
+#Fit logistic regression on TRAIN (from Q2 split) and evaluate ranking on TEST
+logit_full <- glm(habitable ~ ., data = train, family = binomial)
+
+#Add predicted probabilities on the held-out test set
+rank_df_logit <- test |>
+  mutate(
+    habitable_num = as.integer(as.character(habitable)),
+    prob_habitable = predict(logit_full, newdata = test, type = "response")
+  ) |>
+  arrange(desc(prob_habitable))
+
+#Function to compute FDR for top fraction
+compute_fdr <- function(df, top_frac) {
+  n_top <- max(1, ceiling(top_frac * nrow(df)))
+  top_df <- df[1:n_top, ]
+
+  false_positives <- sum(top_df$habitable_num == 0)
+  fdr <- false_positives / n_top
+
+  tibble(
+    top_fraction = top_frac,
+    n_selected = n_top,
+    false_positives = false_positives,
+    fdr = fdr
+  )
+}
+
+#FDR at key thresholds (on test set ranking)
+fdr_logit <- bind_rows(
+  compute_fdr(rank_df_logit, 0.01),
+  compute_fdr(rank_df_logit, 0.05),
+  compute_fdr(rank_df_logit, 0.10)
+)
+
+fdr_logit
+```
+
+```{r q4-visuals}
+fdr_curve_logit <- map_dfr(
+  seq(0.01, 0.30, by = 0.01),
+  ~compute_fdr(rank_df_logit, .x)
+)
+
+baseline_fdr <- mean(rank_df_logit$habitable_num == 0)
+
+ggplot(fdr_curve_logit, aes(x = top_fraction, y = fdr)) +
+  geom_line() +
+  geom_point() +
+  geom_hline(yintercept = baseline_fdr, linetype = "dashed") +
+  labs(
+    title = "False Discovery Rate vs Selection Threshold",
+    x = "Top Fraction of Ranked Planets",
+    y = "False Discovery Rate"
+  ) +
+  theme_minimal()
+```
+
+```{r bonus-question}
+#-------------------------
+#Bonus: "Backup Earth" ranking using habitability probability + distance
+#-------------------------
+
+#1. Fit model on Model A (high-coverage predictors)
+logit_full <- glm(habitable ~ ., data = model_A, family = binomial)
+
+#2. Add predicted probability back onto exoplanets_labeled
+#Keep only rows where all Model A predictors are present
+#AND restrict to the 70 catalog-habitable planets
+backup_df <- exoplanets_labeled |>
+  filter(habitable == 1) |>
+  select(
+    pl_name, hostname, sy_dist,
+    #predictors used in model_A
+    pl_rade, pl_orbper, pl_orbsmax, pl_insol, pl_eqt,
+    st_teff, st_rad, st_mass,
+    sy_snum, sy_pnum
+  ) |>
+  drop_na() |>
+  mutate(
+  #Use the full data frame explicitly (cur_data() can be brittle)
+  prob_habitable = predict(logit_full, newdata = pick(all_of(names(model_A)[-1])), type = "response"),
+  dist_ly = sy_dist * 3.26156
+)
+
+
+#3. Define a combined score
+#Score = probability / distance (pc)
+backup_ranked <- backup_df |>
+  mutate(
+    backup_score = prob_habitable / sy_dist
+  ) |>
+  arrange(desc(backup_score))
+
+#4. Show top candidates
+backup_ranked |>
+  select(pl_name, hostname, sy_dist, dist_ly, prob_habitable, backup_score) |>
+  head(10)
+```
+
+```{r project}
+#-------------------------
+#Top-ranked candidate habitable planets NOT in HWC
+#-------------------------
+
+#Use the trained random forest from Q2
+#Predict probabilities for all planets with Model A predictors
+candidates_df <- exoplanets_labeled |>
+  filter(habitable == 0) |>   # NOT in the 70 catalog planets
+  select(
+    pl_name, hostname, sy_dist,
+    pl_rade, pl_orbper, pl_orbsmax, pl_insol, pl_eqt,
+    st_teff, st_rad, st_mass,
+    sy_snum, sy_pnum
+  ) |>
+  drop_na()
+
+# Predict RF probabilities
+candidates_df <- candidates_df |>
+  mutate(
+    prob_habitable = predict(
+      rf_fit,
+      newdata = candidates_df |> select(-pl_name, -hostname, -sy_dist),
+      type = "prob"
+    )[,"1"],
+    dist_ly = sy_dist * 3.26156
+  )
+
+#Rank by probability only (no distance yet)
+top10_candidates <- candidates_df |>
+  arrange(desc(prob_habitable)) |>
+  slice(1:10)
+
+top10_candidates |>
+  select(pl_name, hostname, sy_dist, dist_ly, prob_habitable)
+```
